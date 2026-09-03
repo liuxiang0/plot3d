@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 产物（可再生成，体积大）
+output/
+web/qa/
+svg/
+
+# 用户本地状态（可选保留）
+# user_define.json
+# gallery_favs.json
+
+# 编辑器/系统
+.DS_Store
+*.swp

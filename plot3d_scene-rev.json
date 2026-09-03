@@ -1,0 +1,108 @@
+{
+  "app": "plotter3d",
+  "version": 2,
+  "camera": {
+    "az": -4.023197551196615,
+    "el": 1.0003243512829303,
+    "zoom": 364.10019621371174,
+    "panx": 70.55226601462994,
+    "pany": -185.80567756389007,
+    "tx": 0.0,
+    "ty": 0.0,
+    "tz": 0.0
+  },
+  "depth_cue": 0.0,
+  "surface_mode": "solid",
+  "objects": [
+    {
+      "name": "O19·参数曲线",
+      "expr": "x=1+cos(t), y=sin(t), z=2*sin(t/2); t=0..4pi",
+      "color": "#74c7ec",
+      "visible": false
+    },
+    {
+      "name": "O20·显式曲线",
+      "expr": "y=8/(x^2+4); x=-8..8",
+      "color": "#eba0ac",
+      "visible": false
+    },
+    {
+      "name": "O21·旋转面",
+      "expr": "y=8/(x^2+4); x=-8..8 ⤾ ((0.0, 0.0, 0.0)→(1.0, 0.0, 0.0))",
+      "color": "#f9e2af",
+      "visible": false
+    },
+    {
+      "name": "O22·隐式曲线",
+      "expr": "(x^2+y^2)^2=2*(x^2-y^2); x=-1.8..1.8, y=-0.9..0.9",
+      "color": "#89b4fa",
+      "visible": false
+    },
+    {
+      "name": "O23·旋转面",
+      "expr": "(x^2+y^2)^2=2*(x^2-y^2); x=-1.8..1.8, y=-0.9..0.9 ⤾ ((0.0, 0.0, 0.0)→(1.0, 0.0, 0.0))",
+      "color": "#a6e3a1",
+      "visible": false
+    },
+    {
+      "name": "O24·隐式曲线",
+      "expr": "y^2*(2-x)=x^3; x=-0.2..1.99, y=-9..9",
+      "color": "#f38ba8",
+      "visible": false
+    },
+    {
+      "name": "O25·旋转面",
+      "expr": "(x^2+y^2)^2=2*(x^2-y^2); x=-1.8..1.8, y=-0.9..0.9 ⤾ ((0.0, 0.0, 0.0)→(0.0, 1.0, 0.0))",
+      "color": "#cba6f7",
+      "visible": false
+    },
+    {
+      "name": "O26·隐式曲线",
+      "expr": "x^2-y^2=1; x=-3..3, y=-3..3",
+      "color": "#fab387",
+      "visible": false
+    },
+    {
+      "name": "O27·旋转面",
+      "expr": "x^2-y^2=1; x=-3..3, y=-3..3 ⤾ ((0.0, 0.0, 0.0)→(0.0, 1.0, 0.0))",
+      "color": "#94e2d5",
+      "visible": false
+    },
+    {
+      "name": "O28·参数曲线",
+      "expr": "x=cos(t)+t*sin(t), y=sin(t)-t*cos(t), z=0; t=0..3pi",
+      "color": "#f2cdcd",
+      "visible": false
+    },
+    {
+      "name": "O31·旋转面",
+      "expr": "x=cos(t)+t*sin(t), y=sin(t)-t*cos(t), z=0; t=0..3pi ⤾ ((0.0, 0.0, 0.0)→(0.0, 1.0, 0.0))",
+      "color": "#f9e2af",
+      "visible": false
+    },
+    {
+      "name": "O33·参数曲线",
+      "expr": "x=2*cos(t)-cos(2t), y=2*sin(t)-sin(2t), z=0; t=0..2pi",
+      "color": "#a6e3a1",
+      "visible": false
+    },
+    {
+      "name": "O34·旋转面",
+      "expr": "x=2*cos(t)-cos(2t), y=2*sin(t)-sin(2t), z=0; t=0..2pi ⤾ ((0.0, 0.0, 0.0)→(1.0, 0.0, 0.0))",
+      "color": "#f38ba8",
+      "visible": false
+    },
+    {
+      "name": "O35·参数曲线",
+      "expr": "x=cos(t)^3, y=sin(t)^3, z=0; t=0..2pi",
+      "color": "#cba6f7",
+      "visible": false
+    },
+    {
+      "name": "O36·旋转面",
+      "expr": "x=cos(t)^3, y=sin(t)^3, z=0; t=0..2pi ⤾ ((0.0, 0.0, 0.0)→(1.0, 0.0, 0.0))",
+      "color": "#fab387",
+      "visible": false
+    }
+  ]
+}

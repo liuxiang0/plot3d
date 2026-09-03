@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>plot3d · 曲线与曲面</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header id="topbar">
+  <button id="btn-lib" title="图形库">☰</button>
+  <div id="title">plot3d <span>曲线与曲面库</span></div>
+  <button id="btn-info" title="资料卡">ℹ</button>
+</header>
+
+<div id="scene-wrap"><canvas id="scene"></canvas></div>
+
+<div id="hud">
+  <div id="status"></div>
+  <div id="ctrl">
+    <button data-act="axes" class="tgl on">坐标轴</button>
+    <button data-act="grid" class="tgl on">网格</button>
+    <button data-act="wire" class="tgl">线框</button>
+    <button data-act="reset">复位</button>
+  </div>
+</div>
+
+<!-- 图形库抽屉 -->
+<aside id="drawer">
+  <div id="search-row"><input id="q" placeholder="🔍 搜索曲线/曲面…"></div>
+  <div id="custom-row">
+    <input id="custom-expr" placeholder="自定义表达式, 如 x^2+y^2=z">
+    <button id="btn-plot">绘制</button>
+  </div>
+  <div id="lib-list"></div>
+</aside>
+<div id="drawer-mask"></div>
+
+<!-- 资料卡 -->
+<aside id="card">
+  <button id="card-close">✕</button>
+  <div id="card-body"></div>
+</aside>
+
+<div id="toast"></div>
+
+<script src="/static/lib/three.min.js"></script>
+<script src="/static/lib/OrbitControls.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+{
+  "app": "plotter3d",
+  "version": 2,
+  "camera": {
+    "az": -4.559197551196596,
+    "el": -0.2956756487170694,
+    "zoom": 51.45779210337303,
+    "panx": 167.00265438628395,
+    "pany": 61.511503791598116,
+    "tx": 0.0,
+    "ty": 0.0,
+    "tz": 0.0
+  },
+  "depth_cue": 0.0,
+  "surface_mode": "solid",
+  "objects": [
+    {
+      "name": "O1·隐式曲面",
+      "expr": "(x^2+y^2)/a^2 = z^2/b^2",
+      "color": "#f9e2af",
+      "visible": false
+    },
+    {
+      "name": "O2·参数曲面",
+      "expr": "x=(0.12*u+0.08*u*cos(v))*cos(u), y=(0.12*u+0.08*u*cos(v))*sin(u), z=0.08*u*sin(v)-0.28*u; u=0..5pi, v=0..2pi",
+      "color": "#89b4fa",
+      "visible": false
+    },
+    {
+      "name": "O3·参数曲面",
+      "expr": "x=2*(cos(u)+u*sin(u))*sin(v)/(1+u^2*sin(v)^2), y=2*(sin(u)-u*cos(u))*sin(v)/(1+u^2*sin(v)^2), z=log(tan(v/2))+2*cos(v)/(1+u^2*sin(v)^2); u=0..4pi, v=0.15..3",
+      "color": "#a6e3a1",
+      "visible": false
+    },
+    {
+      "name": "O4·参数曲面",
+      "expr": "x=(sqrt(2)*cos(v)^2*cos(2*u)+cos(u)*sin(2*v))/(2-sqrt(2)*sin(3*u)*sin(2*v)), y=(sqrt(2)*cos(v)^2*sin(2*u)-sin(u)*sin(2*v))/(2-sqrt(2)*sin(3*u)*sin(2*v)), z=3*cos(v)^2/(2-sqrt(2)*sin(3*u)*sin(2*v)); u=0..pi, v=0..pi",
+      "color": "#f38ba8",
+      "visible": false
+    },
+    {
+      "name": "O5·参数曲面",
+      "expr": "x=cos(u)*sin(v), y=sin(u)*sin(v), z=cos(v)+ln(tan(v/2))+0.2*u; u=0..4pi, v=0.1..2",
+      "color": "#cba6f7",
+      "visible": false
+    },
+    {
+      "name": "O6·参数曲面",
+      "expr": "x=cos(v)/cosh(u), y=sin(v)/cosh(u), z=u-tanh(u); u=0..3, v=0..2pi",
+      "color": "#fab387",
+      "visible": false
+    },
+    {
+      "name": "O7·参数曲面",
+      "expr": "x=u, y=cos(v)/u, z=sin(v)/u; u=1..6, v=0..2pi",
+      "color": "#94e2d5",
+      "visible": false
+    },
+    {
+      "name": "O8·参数曲面",
+      "expr": "x=u*v, y=u^2, z=v^2; u=-1..1, v=-1..1",
+      "color": "#f2cdcd",
+      "visible": false
+    },
+    {
+      "name": "O9·参数曲面",
+      "expr": "x=(2+cos(u/2)*sin(v)-sin(u/2)*sin(2v))*cos(u), y=(2+cos(u/2)*sin(v)-sin(u/2)*sin(2v))*sin(u), z=sin(u/2)*sin(v)+cos(u/2)*sin(2v); u=0..2pi, v=0..2pi",
+      "color": "#74c7ec",
+      "visible": false
+    },
+    {
+      "name": "O10·参数曲面",
+      "expr": "x=(2+cos(v))*cos(u), y=(2+cos(v))*sin(u), z=sin(v); u=0..2pi, v=0..2pi",
+      "color": "#eba0ac",
+      "visible": false
+    },
+    {
+      "name": "O11·参数曲面",
+      "expr": "x=2*sin(u)*cos(v), y=2*sin(u)*sin(v), z=2*cos(u); u=0..pi, v=0..2pi",
+      "color": "#f9e2af",
+      "visible": false
+    },
+    {
+      "name": "O12·隐式曲面",
+      "expr": "sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x)=0; x=-pi..pi, y=-pi..pi, z=-pi..pi",
+      "color": "#89b4fa",
+      "visible": false
+    },
+    {
+      "name": "O13·参数曲面",
+      "expr": "x=cosh(v)*cos(u), y=cosh(v)*sin(u), z=v; u=0..2pi, v=-1.5..1.5",
+      "color": "#a6e3a1",
+      "visible": false
+    },
+    {
+      "name": "O14·参数曲面",
+      "expr": "x=u-u^3/3+u*v^2, y=v-v^3/3+v*u^2, z=u^2-v^2; u=-2..2, v=-2..2",
+      "color": "#f38ba8",
+      "visible": true
+    },
+    {
+      "name": "O15·参数曲面",
+      "expr": "x=v*cos(u), y=v*sin(u), z=u/6; u=0..4pi, v=-1..1",
+      "color": "#cba6f7",
+      "visible": false
+    }
+  ]
+}
