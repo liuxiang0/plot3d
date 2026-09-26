@@ -445,7 +445,49 @@ def entry_polylines(spec):
 
 # ---------------- 渲染 ----------------
 
+def _render_faces_thumb(entry, path, size=SIZE):
+    """平直多面体缩略图: 精确多边形面 + Lambert 着色 + 画家算法（无线框/无毛刺）"""
+    img = Image.new('RGB', (size, size), BG)
+    d = ImageDraw.Draw(img)
+    color = CAT_COLORS.get(entry.get('category', ''), DEFAULT_COLOR)
+    rgb = tuple(int(color[i:i + 2], 16) for i in (1, 3, 5))
+    pts_all = [p for f in entry['faces'] for p in f]
+    xs = [p[0] for p in pts_all]; ys = [p[1] for p in pts_all]
+    zs = [p[2] for p in pts_all]
+    cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+    cz = (min(zs) + max(zs)) / 2
+    span = max(max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs), 1e-9)
+    k = 2.4 / span
+    cam = engine3d.Camera()
+    cam.zoom = size * 0.38
+    L = (-0.45, -0.55, 0.75)
+    ln = math.sqrt(sum(c * c for c in L))
+    L = tuple(c / ln for c in L)
+    items = []
+    for poly in entry['faces']:
+        nx = ny = nz = 0.0                          # Newell 法向
+        for i in range(len(poly)):
+            a, b = poly[i], poly[(i + 1) % len(poly)]
+            nx += (a[1] - b[1]) * (a[2] + b[2])
+            ny += (a[2] - b[2]) * (a[0] + b[0])
+            nz += (a[0] - b[0]) * (a[1] + b[1])
+        nl = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
+        bri = 0.32 + 0.68 * abs(nx * L[0] + ny * L[1] + nz * L[2]) / nl
+        shade = tuple(min(255, int(c * bri)) for c in rgb)
+        proj = [cam.project((p[0] - cx) * k, (p[1] - cy) * k,
+                            (p[2] - cz) * k, size, size) for p in poly]
+        depth = sum(q[2] for q in proj) / len(proj)
+        items.append((depth, [(q[0], q[1]) for q in proj], shade))
+    items.sort(key=lambda it: -it[0])               # 远→近
+    for _, pts2, shade in items:
+        d.polygon(pts2, fill=shade, outline=shade)
+    img.save(path)
+    return True
+
+
 def render_thumb(entry, path, size=SIZE):
+    if entry.get('faces'):
+        return _render_faces_thumb(entry, path, size)
     spec = mathparse.parse_input(entry['expr'])
     lines = entry_polylines(spec)
     img = Image.new('RGB', (size, size), BG)

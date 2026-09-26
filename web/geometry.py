@@ -193,11 +193,22 @@ CAT_COLORS = {
 }
 
 
-def sample(expr, category=''):
-    """表达式 → 几何 JSON。失败抛 mathparse.ParseError / ValueError。"""
+def sample(expr, category='', faces=None):
+    """表达式 → 几何 JSON。失败抛 mathparse.ParseError / ValueError。
+    faces: 平直多面体的精确面数据（有则绕过 Marching Cubes, 边缘无锯齿）。"""
     spec = mathparse.parse_input(expr)
     kind = spec['kind']
     color = CAT_COLORS.get(category, '#cdd6f4')
+
+    if faces:
+        verts, idx = [], []
+        for poly in faces:                          # 每面独立顶点 → 平板着色硬边
+            b = len(verts)
+            verts.extend([tuple(p) for p in poly])
+            for i in range(1, len(poly) - 1):
+                idx += [b, b + i, b + i + 1]
+        return {'type': 'mesh', 'vertices': _flat(verts), 'faces': idx,
+                'color': color, 'bbox': _bbox(verts), 'kind': 'polyhedron'}
 
     if kind == 'parametric':
         pts = _sample_param_curve(spec)

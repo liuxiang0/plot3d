@@ -335,6 +335,15 @@ BUILTIN = {
              'desc': '半透明边界球面 + z=0 截面圆盘'},
 }
 
+# 平直多面体挂载精确面数据（绕过 Marching Cubes 格网锯齿, 见 polytopes.py）
+try:
+    from polytopes import FACES as _POLY_FACES
+except Exception:                                  # pragma: no cover
+    _POLY_FACES = {}
+for _k in _POLY_FACES:
+    if _k in BUILTIN:
+        BUILTIN[_k]['faces'] = _POLY_FACES[_k]
+
 _TEMPLATE = {
     "_readme": ("自定义曲线/曲面配置。键为唯一 ID；name=显示名；category=菜单分类；"
                 "expr=表达式（与输入框语法相同，兼容 LaTeX，注意 JSON 中反斜杠须写双份，"
@@ -388,7 +397,8 @@ def load_all(user_path=USER_FILE):
         cat = e.get('category') or '未分类'
         grouped.setdefault(cat, []).append(
             {'key': key, 'name': e['name'], 'expr': e['expr'],
-             'category': cat, 'desc': e.get('desc', ''), 'user': user})
+             'category': cat, 'desc': e.get('desc', ''), 'user': user,
+             'faces': e.get('faces')})
 
     for k, e in BUILTIN.items():
         add(k, e)

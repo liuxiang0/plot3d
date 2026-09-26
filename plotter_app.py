@@ -24,6 +24,14 @@ BG = engine3d.BG
 COLORS = {'explicit2d': '#f9e2af', 'implicit2d': '#a6e3a1',
           'parametric': '#f38ba8'}
 SURF_BASE = (137, 180, 250)
+# 平直多面体精确面查找表（plain 表达式 → faces）：渲染时绕过 Marching Cubes 格网锯齿
+FACES_BY_PLAIN = {}
+for _e in curve_library.BUILTIN.values():
+    if _e.get('faces'):
+        try:
+            FACES_BY_PLAIN[mathparse.parse_input(_e['expr'])['plain']] = _e['faces']
+        except Exception:
+            pass
 LIGHT = (-0.45, -0.55, 0.75)
 FILL_STYLE = ('#89b4fa', 'gray50')                  # 不等式区域: 蓝色半透明(点纹)
 BOUND_COLOR = '#f9e2af'                             # 区域边界线
@@ -850,6 +858,18 @@ class PlotterApp(tk.Frame):
         return '隐式曲线 F(x,y)=0（自适应平滑）'
 
     def _plot_implicit3d(self, spec):
+        faces = FACES_BY_PLAIN.get(spec['plain'])
+        if faces:                                   # 精确多面体: 直接扇形剖分着色
+            base = (engine3d.hex_to_rgb(self._obj_color) if self._obj_color
+                    else (176, 196, 250))
+            tris = []
+            for poly in faces:
+                p0 = tuple(poly[0])
+                for i in range(1, len(poly) - 1):
+                    tris.append((p0, tuple(poly[i]), tuple(poly[i + 1])))
+            self.eng.add_mesh(_shade_tris(tris, base=base))
+            return (f'精确多面体 · {len(faces)} 面 / {len(tris)} 三角形'
+                    f'（平直面精确渲染, 无 MC 锯齿）')
         base = (engine3d.hex_to_rgb(self._obj_color) if self._obj_color
                 else (176, 196, 250))
         tris, info = marching_cubes_adaptive(

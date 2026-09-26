@@ -86,7 +86,8 @@ def get_geometry(key=None, expr=None):
     entry = next((e for e in LIBRARY if e['key'] == key), None)
     if entry is None:
         return None
-    geo = geometry.sample(entry['expr'], entry['category'])   # 失败抛异常
+    faces = curve_library.BUILTIN.get(key, {}).get('faces')
+    geo = geometry.sample(entry['expr'], entry['category'], faces=faces)
     with _cache_lock:
         _cache[key] = geo
     return geo
