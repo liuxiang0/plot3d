@@ -28,7 +28,7 @@ scene.add(axes); scene.add(grid);
 const geoGroup = new THREE.Group();
 scene.add(geoGroup);
 
-let lastBBox = null, wireMode = false;
+let lastBBox = null, wireMode = false, polyEdges = null;
 const mats = [];                     // 记录材质以便切换线框
 
 function resize() {
@@ -54,6 +54,7 @@ function clearGeo() {
       .forEach(m => m.dispose());
   }
   mats.length = 0;
+  polyEdges = null;
 }
 
 function fitCamera(bbox) {
@@ -82,9 +83,18 @@ function renderGeo(g) {
     geom.computeVertexNormals();
     const mat = new THREE.MeshPhongMaterial({
       color: col, shininess: 40, side: THREE.DoubleSide,
-      specular: 0x222233, wireframe: wireMode });
+      specular: 0x222233, wireframe: wireMode && !g.edges });
     mats.push(mat);
     geoGroup.add(new THREE.Mesh(geom, mat));
+    if (g.edges) {                    // 多面体: 真棱线框（无扇形对角线）
+      const eg = new THREE.BufferGeometry();
+      eg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(g.vertices), 3));
+      eg.setIndex(g.edges);
+      polyEdges = new THREE.LineSegments(eg,
+        new THREE.LineBasicMaterial({ color: 0xcdd6f4 }));
+      polyEdges.visible = wireMode;
+      geoGroup.add(polyEdges);
+    }
   } else if (g.type === 'lines') {
     for (const L of g.lines) {
       const geom = new THREE.BufferGeometry();
@@ -225,7 +235,13 @@ document.querySelectorAll('#ctrl .tgl, #ctrl [data-act=reset]').forEach(b => {
     if (act === 'grid') { grid.visible = !grid.visible; b.classList.toggle('on', grid.visible); }
     if (act === 'wire') {
       wireMode = !wireMode; b.classList.toggle('on', wireMode);
-      mats.forEach(m => { if ('wireframe' in m) m.wireframe = wireMode; });
+      if (polyEdges) {                // 多面体: 只显示真棱, 隐藏实体面
+        polyEdges.visible = wireMode;
+        geoGroup.children.forEach(o => { if (o.isMesh) o.visible = !wireMode; });
+        mats.forEach(m => { if ('wireframe' in m) m.wireframe = false; });
+      } else {
+        mats.forEach(m => { if ('wireframe' in m) m.wireframe = wireMode; });
+      }
     }
     if (act === 'reset') fitCamera(lastBBox);
   };

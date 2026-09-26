@@ -481,6 +481,28 @@ def _shade_tris(tris, base=(176, 196, 250)):
     return out
 
 
+def _shade_polys(polys, base=(176, 196, 250)):
+    """平直多边形面 → [(顶点元组, 色)] ：Newell 法向 + Lambert。
+    面以 n 边形整面入管线：实体填充不变，线划模式只出现真棱（无扇形对角线）。"""
+    Lx, Ly, Lz = _norm3(LIGHT)
+    out = []
+    for poly in polys:
+        nx = ny = nz = 0.0
+        for i in range(len(poly)):
+            a, b = poly[i], poly[(i + 1) % len(poly)]
+            nx += (a[1] - b[1]) * (a[2] + b[2])
+            ny += (a[2] - b[2]) * (a[0] + b[0])
+            nz += (a[0] - b[0]) * (a[1] + b[1])
+        nl = math.sqrt(nx * nx + ny * ny + nz * nz)
+        if nl < 1e-15:
+            continue
+        bri = 0.32 + 0.68 * abs(nx * Lx + ny * Ly + nz * Lz) / nl
+        out.append((tuple(poly), '#%02x%02x%02x' % (int(base[0] * bri),
+                                                    int(base[1] * bri),
+                                                    int(base[2] * bri))))
+    return out
+
+
 def surface_quads(f, xr, yr, n=42, base=SURF_BASE):
     """显式曲面 → 带 Lambert 着色的四边形片列表"""
     x0, x1 = xr
@@ -859,17 +881,13 @@ class PlotterApp(tk.Frame):
 
     def _plot_implicit3d(self, spec):
         faces = FACES_BY_PLAIN.get(spec['plain'])
-        if faces:                                   # 精确多面体: 直接扇形剖分着色
+        if faces:                                   # 精确多面体: n 边形整面入管线
             base = (engine3d.hex_to_rgb(self._obj_color) if self._obj_color
                     else (176, 196, 250))
-            tris = []
-            for poly in faces:
-                p0 = tuple(poly[0])
-                for i in range(1, len(poly) - 1):
-                    tris.append((p0, tuple(poly[i]), tuple(poly[i + 1])))
-            self.eng.add_mesh(_shade_tris(tris, base=base))
-            return (f'精确多面体 · {len(faces)} 面 / {len(tris)} 三角形'
-                    f'（平直面精确渲染, 无 MC 锯齿）')
+            polys = [tuple(tuple(p) for p in poly) for poly in faces]
+            self.eng.add_mesh(_shade_polys(polys, base=base))
+            return (f'精确多面体 · {len(faces)} 个 n 边形面'
+                    f'（线划模式仅真棱, 无三角剖分对角线）')
         base = (engine3d.hex_to_rgb(self._obj_color) if self._obj_color
                 else (176, 196, 250))
         tris, info = marching_cubes_adaptive(

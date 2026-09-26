@@ -207,7 +207,23 @@ def sample(expr, category='', faces=None):
             verts.extend([tuple(p) for p in poly])
             for i in range(1, len(poly) - 1):
                 idx += [b, b + i, b + i + 1]
+        # 真棱表（坐标去重）: 线框模式只画多面体的真棱, 不画扇形对角线
+        coord_id, edges, seen = {}, [], set()
+        for vi, p in enumerate(verts):
+            key = tuple(round(c, 6) for c in p)
+            coord_id.setdefault(key, vi)
+        for poly in faces:
+            n = len(poly)
+            for i in range(n):
+                ka = tuple(round(c, 6) for c in poly[i])
+                kb = tuple(round(c, 6) for c in poly[(i + 1) % n])
+                ek = frozenset((ka, kb))
+                if ek in seen:
+                    continue
+                seen.add(ek)
+                edges += [coord_id[ka], coord_id[kb]]
         return {'type': 'mesh', 'vertices': _flat(verts), 'faces': idx,
+                'edges': edges,
                 'color': color, 'bbox': _bbox(verts), 'kind': 'polyhedron'}
 
     if kind == 'parametric':
