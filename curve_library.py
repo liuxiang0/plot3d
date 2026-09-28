@@ -356,8 +356,8 @@ for _k in _POLY_FACES:
 # 三角剖分层（显示管线②级）: 生成器产三角面片, 复用 'faces' 机制（见 trisurf.py）
 _GEN_SPECS = {
     'geodesic': {'name': '测地球 (Fuller 三角剖分球)', 'category': '三角剖分曲面',
-                 'gen': 'geodesic', 'freq': 3, 'R': 2.0,
-                 'desc': '二十面体细分 freq=3 再投影球面：180 个球面三角形，顶点精确在球上；等价球面点集凸包/3D Delaunay'},
+                 'gen': 'geodesic', 'freq': 6, 'R': 2.0,
+                 'desc': '二十面体细分 freq=6 再投影球面：720 个球面三角形（频率加倍 f:3→6，弦误差 1/4），顶点精确在球上；测地族计数 20f²，等价球面点集凸包/3D Delaunay'},
     'bezier_tri': {'name': '三次三角 Bézier 片', 'category': '三角剖分曲面',
                    'gen': 'bezier_tri', 'm': 22,
                    'desc': '参数域为三角形（非矩形）→ 重心格点三角剖分后求值；矩形 quad 网格在三角域上不可用'},
