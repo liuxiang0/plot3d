@@ -353,6 +353,32 @@ for _k in _POLY_FACES:
     if _k in BUILTIN:
         BUILTIN[_k]['faces'] = _POLY_FACES[_k]
 
+# 三角剖分层（显示管线②级）: 生成器产三角面片, 复用 'faces' 机制（见 trisurf.py）
+_GEN_SPECS = {
+    'geodesic': {'name': '测地球 (Fuller 三角剖分球)', 'category': '三角剖分曲面',
+                 'gen': 'geodesic', 'freq': 3, 'R': 2.0,
+                 'desc': '二十面体细分 freq=3 再投影球面：180 个球面三角形，顶点精确在球上；等价球面点集凸包/3D Delaunay'},
+    'bezier_tri': {'name': '三次三角 Bézier 片', 'category': '三角剖分曲面',
+                   'gen': 'bezier_tri', 'm': 22,
+                   'desc': '参数域为三角形（非矩形）→ 重心格点三角剖分后求值；矩形 quad 网格在三角域上不可用'},
+    'terrain_delaunay': {'name': '散点采样地形 (2D Delaunay)', 'category': '三角剖分曲面',
+                         'gen': 'terrain', 'n': 1400, 'seed': 7,
+                         'desc': '点云路线: z=f(x,y) 散点采样后 scipy Delaunay 连接，顶点即原采样点（不新增顶点）'},
+    'sph_tri_patch': {'name': '球面三角片 (大圆边)', 'category': '三角剖分曲面',
+                      'gen': 'sph_tri_patch', 'm': 20, 'R': 2.0,
+                      'desc': '平面三角域重心格点三角剖分 → 归一化到球面；三条边为大圆弧'},
+}
+try:
+    import trisurf as _trisurf
+except Exception:                                  # pragma: no cover
+    _trisurf = None
+for _k, _spec in _GEN_SPECS.items():
+    _e = {'name': _spec['name'], 'category': _spec['category'],
+          'desc': _spec.get('desc', ''), 'gen': True}
+    if _trisurf is not None:
+        _e['faces'] = _trisurf.build(_spec)
+    BUILTIN[_k] = _e
+
 _TEMPLATE = {
     "_readme": ("自定义曲线/曲面配置。键为唯一 ID；name=显示名；category=菜单分类；"
                 "expr=表达式（与输入框语法相同，兼容 LaTeX，注意 JSON 中反斜杠须写双份，"
@@ -395,8 +421,21 @@ def load_all(user_path=USER_FILE):
     grouped, warns = {}, []
 
     def add(key, e, user=False):
-        if not isinstance(e, dict) or not e.get('name') or not e.get('expr'):
-            warns.append(f'条目 {key} 忽略: 缺少 name/expr 字段')
+        if not isinstance(e, dict) or not e.get('name'):
+            warns.append(f'条目 {key} 忽略: 缺少 name 字段')
+            return
+        if e.get('gen'):                            # 三角剖分曲面: 无表达式, 面片由生成器给出
+            if not e.get('faces'):
+                warns.append(f'条目 {key} 生成失败: 无 faces')
+                return
+            cat = e.get('category') or '未分类'
+            grouped.setdefault(cat, []).append(
+                {'key': key, 'name': e['name'], 'expr': '', 'category': cat,
+                 'desc': e.get('desc', ''), 'user': user,
+                 'faces': e['faces'], 'gen': True})
+            return
+        if not e.get('expr'):
+            warns.append(f'条目 {key} 忽略: 缺少 expr 字段')
             return
         try:
             mathparse.parse_input(e['expr'])

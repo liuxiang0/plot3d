@@ -155,7 +155,7 @@ def _card_html(e, card, img_b64, fav, color):
         import mathparse
         plain = mathparse.parse_input(e['expr'])['plain']
     except Exception:
-        plain = e['expr']
+        plain = e['expr'] or f"生成曲面（{e.get('desc', '三角剖分')}）"
     parts.append(f'<div class="expr"><b style="color:#89b4fa;font-size:12px">表达式</b>'
                  f'<code>{_esc(plain)}</code></div>')
     if card:

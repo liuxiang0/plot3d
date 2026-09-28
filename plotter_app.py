@@ -1020,6 +1020,14 @@ class PlotterApp(tk.Frame):
 
     def load_entry(self, e):
         """函数库一键调用: 载入表达式 + 绘制 + 状态行附注说明"""
+        if e.get('gen') and e.get('faces'):         # 三角剖分曲面: 直接画三角面片
+            self.eng.clear_all()
+            self.eng.add_mesh(_shade_polys(
+                [tuple(tuple(p) for p in tri) for tri in e['faces']], base=SURF_BASE))
+            self._status(f'✓ 三角剖分曲面 · {len(e["faces"])} 三角形（管线②级）')
+            if e.get('desc'):
+                self._status(self.status.cget('text') + '  ·  ' + e['desc'])
+            return
         self.load(e['expr'])
         if e.get('desc') and self.status.cget('text').startswith('✓'):
             self.status.config(
