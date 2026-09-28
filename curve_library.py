@@ -319,7 +319,7 @@ BUILTIN = {
                    'desc': '半轴 3/2/1 椭球的闭式参数化：顶点精确落面，线框为经纬等值线；与隐式条目 ellipsoid 同形对照'},
     'phyperboloid': {'name': '单叶双曲面 r(u,v)', 'category': '参数曲面',
                      'expr': 'x=cosh(v)*cos(u), y=cosh(v)*sin(u), z=sinh(v); u=0..2pi, v=-1.5..1.5',
-                     'desc': 'x²+y²−z²=1 的参数化（腰圆半径 1）：直纹面，参数网格比 MC 三角剖分干净；对照隐式条目 hyperboloid'},
+                     'desc': 'x²+y²−z²=1 的参数化（腰圆半径 1）：直纹面，参数网格比 MC（立方体巡游）干净；对照隐式条目 hyperboloid'},
     'phyperboloid2': {'name': '双叶双曲面 r(u,v) (上叶)', 'category': '参数曲面',
                       'expr': 'x=sinh(v)*cos(u), y=sinh(v)*sin(u), z=cosh(v); u=0..2pi, v=0..1.8',
                       'desc': 'z²−x²−y²=1 的上叶参数化（下叶对称，见隐式条目 hyperboloid2 双叶全貌）；双曲几何的超球面模型就是这张叶'},
