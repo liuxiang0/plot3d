@@ -1024,9 +1024,9 @@ class PlotterApp(tk.Frame):
             self.eng.clear_all()
             self.eng.add_mesh(_shade_polys(
                 [tuple(tuple(p) for p in tri) for tri in e['faces']], base=SURF_BASE))
-            self._status(f'✓ 三角剖分曲面 · {len(e["faces"])} 三角形（管线②级）')
+            self._status(f'✓ 三角剖分曲面 · {len(e["faces"])} 三角形（管线②级）', '#a6e3a1')
             if e.get('desc'):
-                self._status(self.status.cget('text') + '  ·  ' + e['desc'])
+                self._status(self.status.cget('text') + '  ·  ' + e['desc'], '#a6adc8')
             return
         self.load(e['expr'])
         if e.get('desc') and self.status.cget('text').startswith('✓'):
