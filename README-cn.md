@@ -96,7 +96,7 @@ python3 plot3d/spline_app.py        # 仅样条设计器
 
 ## 目录结构
 
-```
+```text
 plot3d/
 ├── main_app.py          # 合并入口（双标签）
 ├── plotter_app.py       # 三维函数绘图器
