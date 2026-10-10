@@ -42,15 +42,23 @@ def _normal(a, b, c):
     return nx / nl, ny / nl, nz / nl
 
 
-def export_obj(meshes, path, name='plot3d'):
-    """导出 Wavefront OBJ（顶点去重按面序写入, 每网格一个 group）。返回三角形数"""
+def export_obj(meshes, path, name='plot3d', target_tris=None):
+    """导出 Wavefront OBJ（顶点去重按面序写入, 每网格一个 group）。返回三角形数
+    target_tris: 给定且总三角数超限时, 先经 simplify.Quadric Edge Collapse 抽稀"""
+    if target_tris:
+        import simplify
+        groups = [('simplified',
+                   simplify.decimate_tris(list(triangles(meshes)), target_tris))]
+    else:
+        groups = [(f'mesh_{mi}', list(triangles([quads])))
+                  for mi, quads in enumerate(meshes)]
     ntri = 0
     with open(path, 'w', encoding='utf-8') as f:
         f.write(f'# plot3d export · {name}\n')
         vi = 1
-        for mi, quads in enumerate(meshes):
-            f.write(f'o mesh_{mi}\n')
-            for a, b, c in triangles([quads]):
+        for gname, gtris in groups:
+            f.write(f'o {gname}\n')
+            for a, b, c in gtris:
                 for p in (a, b, c):
                     f.write(f'v {p[0]:.6f} {p[1]:.6f} {p[2]:.6f}\n')
                 f.write(f'f {vi} {vi + 1} {vi + 2}\n')
@@ -59,9 +67,12 @@ def export_obj(meshes, path, name='plot3d'):
     return ntri
 
 
-def export_stl(meshes, path, solid='plot3d'):
-    """导出二进制 STL（3D 打印标准格式）。返回三角形数"""
+def export_stl(meshes, path, solid='plot3d', target_tris=None):
+    """导出二进制 STL（3D 打印标准格式）。返回三角形数。target_tris 同 export_obj"""
     tris = list(triangles(meshes))
+    if target_tris and len(tris) > target_tris:
+        import simplify
+        tris = simplify.decimate_tris(tris, target_tris)
     with open(path, 'wb') as f:
         header = f'plot3d {solid}'.encode()[:80]
         f.write(header + b'\0' * (80 - len(header)))

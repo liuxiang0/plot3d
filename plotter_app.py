@@ -10,7 +10,7 @@
 import json
 import math
 import tkinter as tk
-from tkinter import filedialog, ttk
+from tkinter import filedialog, simpledialog, ttk
 
 import curve_library
 import engine3d
@@ -1101,13 +1101,18 @@ class PlotterApp(tk.Frame):
                        else ('STL 模型', '*.stl')])
         if not path:
             return
+        target = simpledialog.askinteger(
+            '网格简化', '目标三角形数（0 或取消 = 不简化, Quadric Edge Collapse）:',
+            parent=self.winfo_toplevel(), minvalue=0, maxvalue=10000000)
         try:
-            n = (export3d.export_obj(meshes, path, tag) if fmt == 'obj'
-                 else export3d.export_stl(meshes, path, tag))
+            n = (export3d.export_obj(meshes, path, tag, target_tris=target or None)
+                 if fmt == 'obj' else
+                 export3d.export_stl(meshes, path, tag, target_tris=target or None))
         except OSError as e:
             self._status(f'❌ 导出失败: {e}', '#f38ba8')
             return
-        self._status(f'✓ 已导出 {n} 三角形 → {path}', '#a6e3a1')
+        note = f'（简化至 {target}）' if target else ''
+        self._status(f'✓ 已导出 {n} 三角形{note} → {path}', '#a6e3a1')
 
     def _add_slice(self):
         """截面工具: 对选中隐式曲面 F(x,y,z)=0 截 z=h, 轮廓线加入场景"""
