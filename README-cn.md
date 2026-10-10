@@ -3,7 +3,7 @@
 > 经典代数曲线 / 曲面的交互式可视化与教学工具。
 > 桌面端（Tkinter）+ 手机端（Web/Three.js）双形态，数学全在 Python 服务端，前端零计算。
 
-一个面向数学教学与研究的 3D 可视化平台：内置 **115 条**经典曲线/曲面（含 Barth 六次/十次、Kummer 等节点曲面世界纪录保持者），支持任意表达式实时绘图（兼容 LaTeX）、Bézier/NURBS 样条设计、曲率分析、OBJ/STL 3D 打印导出，以及单文件《曲线图鉴》HTML 生成。
+一个面向数学教学与研究的 3D 可视化平台：内置 **116 条**经典曲线/曲面（含 Barth 六次/十次、Kummer 等节点曲面世界纪录保持者），支持任意表达式实时绘图（兼容 LaTeX）、Bézier/NURBS 样条设计、曲率分析、OBJ/STL 3D 打印导出，以及单文件《曲线图鉴》HTML 生成。
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### 🖼 画廊与图鉴
 
-- `gallery.py`：缩略图网格 + 搜索 + 一键载入绘图器 + 112 张资料卡（公式/性质/趣闻）
+- `gallery.py`：缩略图网格 + 搜索 + 一键载入绘图器 + 113 张资料卡（公式/性质/趣闻）
 - `atlas_gen.py`：生成单文件自包含《曲线图鉴》HTML（KaTeX 全内联、分类目录、搜索、收藏、打印版式）→ `output/曲线图鉴.html`
 
 ### 🧮 表达式解析层 `mathparse.py`
@@ -38,7 +38,7 @@
 
 ---
 
-## 内置图形库（115 条）
+## 内置图形库（116 条）
 
 | 分类 | 代表条目 |
 |------|---------|
@@ -47,7 +47,7 @@
 | 空间曲线 | 环面纽结 (2,5)/(3,4)/(3,5)、三维 Lissajous、球面/圆锥螺线 |
 | 经典曲面 | 鞍面、抛物面、高斯钟面、波纹面 |
 | 隐式曲面 | **Barth 六次(50)/十次(300)、Kummer(16)、Cayley(4)、Clebsch、Dupin 圆环面、正三/四/六棱柱** |
-| 极小曲面 | Enneper、悬链面、螺旋面、Schwarz P/D、Gyroid、Scherk |
+| 极小曲面 | Enneper、悬链面、螺旋面、Schwarz P/D、Gyroid、Scherk、**I-WP**（方程经周期胞亏格验证） |
 | 参数曲面 | Boy、Klein 瓶、Kuen、贝壳面、Bohemian 穹顶、Möbius 带、圆柱/椭圆柱、二次曲面经纬网 |
 | 三角剖分曲面 | 测地球 (Fuller)、三次三角 Bézier 片、散点采样地形 (2D Delaunay)、球面三角片 |
 | 不等式区域 | 圆盘、椭圆域、环形域、线性规划可行域、球体 |
@@ -103,14 +103,14 @@ plot3d/
 ├── spline_app.py        # Bézier/NURBS 样条设计器
 ├── engine3d.py          # 3D 矢量引擎（转台投影/SVG·EPS 导出）
 ├── mathparse.py         # 表达式解析层（AST 白名单/LaTeX 兼容）
-├── curve_library.py     # 内置图形库（115 条）
-├── gallery.py           # 画廊（缩略图+搜索+112 资料卡）
+├── curve_library.py     # 内置图形库（116 条）
+├── gallery.py           # 画廊（缩略图+搜索+113 资料卡）
 ├── atlas_gen.py         # 《曲线图鉴》单文件 HTML 生成器
 ├── nurbs.py             # NURBS 数学（含旋转面精确构造器）
 ├── surf_analysis.py     # 曲率分析（K + H）
 ├── export3d.py          # OBJ/STL 导出 + 截面工具
 ├── verify_nodes.py      # 节点曲面数值验证门禁
-├── thumbs/              # 缩略图缓存（115 张）
+├── thumbs/              # 缩略图缓存（116 张）
 ├── web/                 # 手机版 Web 应用
 │   ├── server.py        # 零依赖 HTTP 服务（几何采样 API）
 │   ├── geometry.py      # 无头几何采样层（numpy+skimage）
