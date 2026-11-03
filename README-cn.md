@@ -73,6 +73,20 @@
 - Python 3.10+，桌面端需 `tkinter`、`Pillow`
 - 虚拟环境 `.venv/numina/`（含 `numpy`、`scipy`、`scikit-image`、`faiss-cpu`）
 
+### 运行环境矩阵（两个解释器，venv 是超集）
+
+| 用途 | 解释器 | 必需依赖 |
+|------|--------|---------|
+| 桌面 Tk 应用 / 缩略图 / 图鉴 | 系统 `python3` 或 venv（**两者皆可**，均含 tkinter+Pillow+numpy+scipy） | Tk + PIL |
+| 手机 Web 服务 `web/server.py` | **venv**（`.venv/numina`） | 额外需 scikit-image |
+| `verify_nodes.py` / 亏格验证 / `simplify.py` 自检 | venv（系统 python3 亦有 scipy；skimage 仅 venv） | scipy/skimage |
+
+**常见误区**：
+- `uv run main_app.py` 不适用：本项目**无 pyproject.toml**，uv 会建临时空环境（无 PIL/numpy）必然 ImportError；本项目不用 uv。
+- `source .venv/numina/bin/activate` 后仍须 `cd plot3d` 再跑 `python main_app.py`（脚本在该目录）；在 workspace 根目录跑会报文件不存在。或直接用启动器 `plot3d/run.sh`（自动 cd + 优先 venv）。
+- Tk 需要显示器：WSL2 依赖 WSLg 或 X 服务器（`$DISPLAY`）；纯 TTY/SSH 无 DISPLAY 时任何解释器都开不了窗口——与解释器选择无关。手机 Web 端无头运行不受影响。
+- 缩略图为 PIL 离屏渲染（无需显示器），按需生成并缓存于 `thumbs/`，两个解释器均可生成。
+
 ### 桌面端
 
 ```bash
