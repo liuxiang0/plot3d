@@ -190,6 +190,12 @@ BUILTIN = {
     'schrodinger_packet': {'name': 'Schrödinger 高斯波包 Re ψ', 'category': '偏微分方程解',
                            'expr': 'z=(1+y^2)^{-0.25}*exp(-(x-3*y)^2/(2*(1+y^2)))*cos(3*x-4.5*y+y*(x-3*y)^2/(2*(1+y^2))-0.5*atan(y)); x=-4..12, y=0..3',
                            'desc': '自由粒子高斯波包（ħ=m=σ₀=1，k₀=3）实部：群速 3 平移 + 色散展宽 √(1+t²) + 啁啾相位；内部干涉条纹即色散的指纹'},
+    'kdv_2soliton': {'name': 'KdV 双孤子碰撞 (Hirota)', 'category': '偏微分方程解',
+                     'expr': 'z=2*((1+exp(2*x-8*y)+exp(1.2*x-1.728*y)+0.0625*exp(3.2*x-9.728*y))*(4*exp(2*x-8*y)+1.44*exp(1.2*x-1.728*y)+0.64*exp(3.2*x-9.728*y))-(2*exp(2*x-8*y)+1.2*exp(1.2*x-1.728*y)+0.2*exp(3.2*x-9.728*y))^2)/(1+exp(2*x-8*y)+exp(1.2*x-1.728*y)+0.0625*exp(3.2*x-9.728*y))^2; x=-12..12, y=-3..3',
+                     'desc': 'KdV u_t+6uu_x+u_xxx=0 的 Hirota 双线性双孤子精确解 u=2(∂x)²ln τ，k1=2, k2=1.2（振幅 2/0.72、速度 4/1.44）：快孤子追上慢孤子弹性碰撞，仅相移不改波形；y 轴为时间'},
+    'ch_peakon': {'name': '浅水峰孤子 (Camassa-Holm)', 'category': '偏微分方程解',
+                  'expr': 'z=exp(-abs(x-y)); x=-8..8, y=-4..4',
+                  'desc': 'Camassa-Holm 方程（浅水渐近模型）峰孤子 u=c·e^(−|x−ct|), c=1：峰顶不可微的弱解、指数衰减尾；SWE 独波 sech² 与 KdV 单孤子同族已入库，故取峰孤子以示浅水族差异'},
     # ---------- 隐式曲面 F(x,y,z)=0 ----------
     'sphere': {'name': '球面 x²+y²+z²=4', 'category': '隐式曲面',
                'expr': 'x^2+y^2+z^2=4; x=-2.5..2.5, y=-2.5..2.5, z=-2.5..2.5',
@@ -398,6 +404,9 @@ _GEN_SPECS = {
     'maxwell_fdtd': {'name': 'Maxwell FDTD 点源波前快照', 'category': '偏微分方程解',
                      'gen': 'fdtd', 'n': 121, 'steps': 80, 'courant': 0.7, 'display': 61,
                      'desc': '2D Yee 格 TMz（E_z/H_x/H_y）高斯脉冲软注入快照：圆波前前缘 ≈ courant·steps 格、能量峰环 ≈ courant·(steps−15)，光锥外场严格为零（因果性）；数值解本身即展品'},
+    'gray_scott': {'name': 'Gray-Scott 反应扩散 Turing 斑图 (spots)', 'category': '偏微分方程解',
+                   'gen': 'gray_scott', 'm': 128, 'iters': 6000, 'zscale': 1.0, 'faces_kind': 'heightfield',
+                   'desc': 'Gray-Scott 反应扩散 Turing 斑图（spots/mitosis 参数 F=0.035, k=0.065, Du=0.16, Dv=0.08）：高度场=V 浓度，周期 Laplacian；数值解本身即展品（磁盘缓存 cache_grayscott.npy）'},
 }
 try:
     import trisurf as _trisurf
@@ -405,7 +414,8 @@ except Exception:                                  # pragma: no cover
     _trisurf = None
 for _k, _spec in _GEN_SPECS.items():
     _e = {'name': _spec['name'], 'category': _spec['category'],
-          'desc': _spec.get('desc', ''), 'gen': True}
+          'desc': _spec.get('desc', ''), 'gen': True,
+          'faces_kind': _spec.get('faces_kind')}
     if _trisurf is not None:
         _e['faces'] = _trisurf.build(_spec)
     BUILTIN[_k] = _e
@@ -463,7 +473,8 @@ def load_all(user_path=USER_FILE):
             grouped.setdefault(cat, []).append(
                 {'key': key, 'name': e['name'], 'expr': '', 'category': cat,
                  'desc': e.get('desc', ''), 'user': user,
-                 'faces': e['faces'], 'gen': True})
+                 'faces': e['faces'], 'gen': True,
+                 'faces_kind': e.get('faces_kind')})
             return
         if not e.get('expr'):
             warns.append(f'条目 {key} 忽略: 缺少 expr 字段')

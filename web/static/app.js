@@ -170,7 +170,8 @@ async function selectEntry(key, fromCustom = false) {
     const e = LIB.find(x => x.key === key);
     const kindName = { parametric: '参数曲线', explicit2d: '显式曲线',
       implicit2d: '隐式曲线', param_surface: '参数曲面', surface: '显式曲面',
-      implicit3d: '隐式曲面', polyhedron: '多面体', triangulated: '三角剖分曲面' }[g.kind] || g.kind;
+      implicit3d: '隐式曲面', polyhedron: '多面体', triangulated: '三角剖分曲面',
+      heightfield: '高度场' }[g.kind] || g.kind;
     statusEl.textContent = (e ? e.name : '自定义') + ` · ${kindName}` +
       (g.type === 'mesh' ? ` · ${g.faces.length / 3} 面片` : ` · ${g.lines.length} 线`);
     showCard(key, g);

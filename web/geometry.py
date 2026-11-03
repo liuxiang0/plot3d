@@ -193,7 +193,7 @@ CAT_COLORS = {
 }
 
 
-def sample(expr, category='', faces=None):
+def sample(expr, category='', faces=None, faces_kind=None):
     """表达式 → 几何 JSON。失败抛 mathparse.ParseError / ValueError。
     faces: 平直多面体/三角剖分曲面的精确面数据（有则绕过解析与 Marching Cubes）。"""
     color = CAT_COLORS.get(category, '#cdd6f4')
@@ -220,7 +220,8 @@ def sample(expr, category='', faces=None):
                     continue
                 seen.add(ek)
                 edges += [coord_id[ka], coord_id[kb]]
-        kind_out = 'triangulated' if all(len(p) == 3 for p in faces) else 'polyhedron'
+        kind_out = faces_kind or (
+            'triangulated' if all(len(p) == 3 for p in faces) else 'polyhedron')
         return {'type': 'mesh', 'vertices': _flat(verts), 'faces': idx,
                 'edges': edges,
                 'color': color, 'bbox': _bbox(verts), 'kind': kind_out}

@@ -60,6 +60,7 @@ for _cat, items in _grouped:
             'expr': e['expr'], 'desc': e.get('desc', ''),
             'formula': c.get('formula', ''), 'props': c.get('props', []),
             'trivia': c.get('trivia', ''), 'user': e.get('user', False),
+            'faces_kind': e.get('faces_kind'),
         })
 
 _cache, _cache_lock = {}, threading.Lock()
@@ -87,7 +88,8 @@ def get_geometry(key=None, expr=None):
     if entry is None:
         return None
     faces = curve_library.BUILTIN.get(key, {}).get('faces')
-    geo = geometry.sample(entry['expr'], entry['category'], faces=faces)
+    geo = geometry.sample(entry['expr'], entry['category'], faces=faces,
+                          faces_kind=entry.get('faces_kind'))
     with _cache_lock:
         _cache[key] = geo
     return geo

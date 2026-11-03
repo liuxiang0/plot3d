@@ -179,12 +179,54 @@ def fdtd(n=121, steps=80, courant=0.7, display=61, raw=False, extent=3.0, zscale
     return faces
 
 
+def _heightfield_quads(V, zscale, lo=-1.0, hi=1.0):
+    """m×m 标量场 → (m−1)² 个四边形面片（高度场 z=V·zscale）"""
+    m = V.shape[0]
+    xs = np.linspace(lo, hi, m)
+    quads = []
+    for i in range(m - 1):
+        for j in range(m - 1):
+            quads.append([[float(xs[i]), float(xs[j]), float(V[i, j] * zscale)],
+                          [float(xs[i + 1]), float(xs[j]), float(V[i + 1, j] * zscale)],
+                          [float(xs[i + 1]), float(xs[j + 1]), float(V[i + 1, j + 1] * zscale)],
+                          [float(xs[i]), float(xs[j + 1]), float(V[i, j + 1] * zscale)]])
+    return quads
+
+
+def gray_scott(m=96, iters=4000, F=0.035, k=0.065, Du=0.16, Dv=0.08,
+               seed=7, zscale=3.0, cache='cache_grayscott.npy'):
+    """Gray-Scott 反应扩散 Turing 斑图（spots/mitosis 参数）→ 高度场四边形面片。
+    周期 Laplacian（5 点 stencil + roll）；结果磁盘缓存，首次模拟后导入零成本。"""
+    import os
+    cpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), cache)
+    if os.path.exists(cpath):
+        V = np.load(cpath)
+        if V.shape == (m, m):
+            return _heightfield_quads(V, zscale)
+    rng = np.random.default_rng(seed)
+    U = np.ones((m, m))
+    V = np.zeros((m, m))
+    for ci in (m // 4, m // 2, 3 * m // 4):          # 3×3 多种子: 斑图铺满周期胞
+        for cj in (m // 4, m // 2, 3 * m // 4):
+            U[ci - 2:ci + 3, cj - 2:cj + 3] = 0.5
+            V[ci - 2:ci + 3, cj - 2:cj + 3] = 0.25
+    V += 0.01 * rng.random((m, m))
+    for _ in range(iters):
+        Lu = np.roll(U, 1, 0) + np.roll(U, -1, 0) + np.roll(U, 1, 1) + np.roll(U, -1, 1) - 4 * U
+        Lv = np.roll(V, 1, 0) + np.roll(V, -1, 0) + np.roll(V, 1, 1) + np.roll(V, -1, 1) - 4 * V
+        uvv = U * V * V
+        U += Du * Lu - uvv + F * (1 - U)
+        V += Dv * Lv + uvv - (F + k) * V
+    np.save(cpath, V)
+    return _heightfield_quads(V, zscale)
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
-        'fdtd': fdtd}
+        'fdtd': fdtd, 'gray_scott': gray_scott}
 
 
-_SKIP = {'gen', 'name', 'category', 'desc'}
+_SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}
 
 
 def build(spec):
