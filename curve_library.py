@@ -184,6 +184,12 @@ BUILTIN = {
     'qho_eigen': {'name': '量子谐振子本征态 ψ₂ψ₂', 'category': '偏微分方程解',
                   'expr': 'z=(4*x^2-2)*(4*y^2-2)*exp(-(x^2+y^2)/2); x=-3..3, y=-3..3',
                   'desc': '定态薛定谔方程 Ĥψ=Eψ（ħ=m=ω=1，E=n_x+n_y+1=5）：H₂ 厄米多项式×高斯，节线 x,y=±1/√2 分四叶正负交替'},
+    'burgers_shock': {'name': '黏性 Burgers 激波', 'category': '偏微分方程解',
+                      'expr': 'z=1/(1+exp(5*(x-0.5*y))); x=-4..4, y=0..6',
+                      'desc': 'u_t+u·u_x=ν·u_xx（ν=0.1）行波激波：u_l=1→u_r=0、速度 s=(u_l+u_r)/2=0.5、厚度 ~4ν；无黏激波被黏性磨成的光滑台阶，激波管/交通流原型'},
+    'schrodinger_packet': {'name': 'Schrödinger 高斯波包 Re ψ', 'category': '偏微分方程解',
+                           'expr': 'z=(1+y^2)^{-0.25}*exp(-(x-3*y)^2/(2*(1+y^2)))*cos(3*x-4.5*y+y*(x-3*y)^2/(2*(1+y^2))-0.5*atan(y)); x=-4..12, y=0..3',
+                           'desc': '自由粒子高斯波包（ħ=m=σ₀=1，k₀=3）实部：群速 3 平移 + 色散展宽 √(1+t²) + 啁啾相位；内部干涉条纹即色散的指纹'},
     # ---------- 隐式曲面 F(x,y,z)=0 ----------
     'sphere': {'name': '球面 x²+y²+z²=4', 'category': '隐式曲面',
                'expr': 'x^2+y^2+z^2=4; x=-2.5..2.5, y=-2.5..2.5, z=-2.5..2.5',
@@ -389,6 +395,9 @@ _GEN_SPECS = {
     'drum_bessel': {'name': '圆膜基模 J₀(αr) 鼓面', 'category': '偏微分方程解',
                     'gen': 'drum', 'nr': 24, 'nth': 64,
                     'desc': '波动方程圆膜本征模 ∇²u=−α²u，α=j₀,₁≈2.40483 使边界 u(1)=0：极坐标结构化格点三角剖分（中心扇形+环带双三角），顶点精确落在 J₀ 曲面上；鼓皮基音模态，“听不出鼓的形状”名题主角'},
+    'maxwell_fdtd': {'name': 'Maxwell FDTD 点源波前快照', 'category': '偏微分方程解',
+                     'gen': 'fdtd', 'n': 121, 'steps': 80, 'courant': 0.7, 'display': 61,
+                     'desc': '2D Yee 格 TMz（E_z/H_x/H_y）高斯脉冲软注入快照：圆波前前缘 ≈ courant·steps 格、能量峰环 ≈ courant·(steps−15)，光锥外场严格为零（因果性）；数值解本身即展品'},
 }
 try:
     import trisurf as _trisurf

@@ -7,6 +7,7 @@
   bezier_tri    : 三次三角 Bézier 片——参数域是三角形（非矩形），重心格点剖分
   terrain       : 散点采样 z=f(x,y) → scipy.spatial.Delaunay(2D) → 提升（点云路线，不新增顶点）
   drum          : 圆膜 Bessel 模态 J₀(αr) 极坐标结构化格点 → 中心扇形 + 环带 quad 两三角（顶点精确）
+  fdtd          : 2D Maxwell FDTD（Yee 格）E_z 快照 → 抽稀结构化格点高度场三角剖分（波前半径≈courant·steps）
   sph_tri_patch : 球面三角片（大圆边）——平面三角域重心格点剖分 → 归一化到球
 
 返回 faces = [ [[x,y,z]*3], ... ]（三角形多边形列表），与 polytopes.py 的 'faces' 机制同构，
@@ -145,8 +146,42 @@ def drum(nr=24, nth=64, alpha=2.404825557695773):
     return faces
 
 
+def fdtd(n=121, steps=80, courant=0.7, display=61, raw=False, extent=3.0, zscale=1.2):
+    """2D Maxwell FDTD（Yee 格，TMz：E_z/H_x/H_y）点源高斯脉冲软注入快照。
+
+    因果性结构：波前半径 ≈ courant·steps 格（光锥外场≈0）——门禁据此校验。
+    raw=True 返回 (Ez, courant, steps) 供验证；否则返回抽稀后高度场三角面。
+    """
+    Ez = np.zeros((n, n)); Hx = np.zeros((n, n)); Hy = np.zeros((n, n))
+    c = (n - 1) // 2
+    for step in range(steps):
+        Hx[:, 1:] -= courant * (Ez[:, 1:] - Ez[:, :-1])
+        Hy[1:, :] += courant * (Ez[1:, :] - Ez[:-1, :])
+        Ez[1:-1, 1:-1] += courant * ((Hy[2:, 1:-1] - Hy[1:-1, 1:-1])
+                                     - (Hx[1:-1, 2:] - Hx[1:-1, 1:-1]))
+        if step < 40:                                   # 高斯脉冲软源
+            Ez[c, c] += np.exp(-((step - 15) / 6.0) ** 2)
+    if raw:
+        return Ez, courant, steps
+    stride = max(1, (n - 1) // (display - 1))
+    g = Ez[::stride, ::stride]
+    pk = np.abs(g).max() or 1.0
+    g = g / pk * zscale
+    nx, ny = g.shape
+    xs = np.linspace(-extent, extent, nx); ys = np.linspace(-extent, extent, ny)
+    v = lambda i, j: [float(xs[i]), float(ys[j]), float(g[i, j])]
+    faces = []
+    for i in range(nx - 1):
+        for j in range(ny - 1):
+            a, b = v(i, j), v(i, j + 1)
+            cc, d = v(i + 1, j + 1), v(i + 1, j)
+            faces.append([a, b, cc]); faces.append([a, cc, d])
+    return faces
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
-        'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum}
+        'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
+        'fdtd': fdtd}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc'}
