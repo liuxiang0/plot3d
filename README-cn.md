@@ -3,7 +3,7 @@
 > 经典代数曲线 / 曲面的交互式可视化与教学工具。
 > 桌面端（Tkinter）+ 手机端（Web/Three.js）双形态，数学全在 Python 服务端，前端零计算。
 
-一个面向数学教学与研究的 3D 可视化平台：内置 **125 条**经典曲线/曲面（含 Barth 六次/十次、Kummer 等节点曲面世界纪录保持者），支持任意表达式实时绘图（兼容 LaTeX）、Bézier/NURBS 样条设计、曲率分析、OBJ/STL 3D 打印导出，以及单文件《曲线图鉴》HTML 生成。
+一个面向数学教学与研究的 3D 可视化平台：内置 **129 条**经典曲线/曲面（含 Barth 六次/十次、Kummer 等节点曲面世界纪录保持者），支持任意表达式实时绘图（兼容 LaTeX）、Bézier/NURBS 样条设计、曲率分析、OBJ/STL 3D 打印导出，以及单文件《曲线图鉴》HTML 生成。
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### 🖼 画廊与图鉴
 
-- `gallery.py`：缩略图网格 + 搜索 + 一键载入绘图器 + 125 张资料卡（公式/性质/趣闻）
+- `gallery.py`：缩略图网格 + 搜索 + 一键载入绘图器 + 129 张资料卡（公式/性质/趣闻）
 - `atlas_gen.py`：生成单文件自包含《曲线图鉴》HTML（KaTeX 全内联、分类目录、搜索、收藏、打印版式）→ `output/曲线图鉴.html`
 
 ### 🧮 表达式解析层 `mathparse.py`
@@ -38,7 +38,7 @@
 
 ---
 
-## 内置图形库（125 条）
+## 内置图形库（129 条）
 
 | 分类 | 代表条目 |
 |------|---------|
@@ -51,11 +51,11 @@
 | 参数曲面 | Boy、Klein 瓶、Kuen、贝壳面、Bohemian 穹顶、Möbius 带、圆柱/椭圆柱、二次曲面经纬网 |
 | 三角剖分曲面 | 测地球 (Fuller)、三次三角 Bézier 片、散点采样地形 (2D Delaunay)、球面三角片 |
 | 不等式区域 | 圆盘、椭圆域、环形域、线性规划可行域、球体 |
-| 偏微分方程解 | 热方程基本解（高斯核）、KdV 单孤子、sine-Gordon 呼吸子、矩形膜 Chladni 模态 (3,2)、量子谐振子本征态 ψ₂ψ₂、圆膜基模 J₀(αr) 鼓面、黏性 Burgers 激波、Schrödinger 高斯波包、Maxwell FDTD 点源波前、KdV 双孤子碰撞 (Hirota)、CH 峰孤子（浅水）、Gray-Scott Turing 斑图 |
+| 偏微分方程解 | 热方程基本解（高斯核）、KdV 单孤子、sine-Gordon 呼吸子、矩形膜 Chladni 模态 (3,2)、量子谐振子本征态 ψ₂ψ₂、圆膜基模 J₀(αr) 鼓面、黏性 Burgers 激波、Schrödinger 高斯波包、Maxwell FDTD 点源波前、KdV 双孤子碰撞 (Hirota)、CH 峰孤子（浅水）、Gray-Scott Turing 斑图、圆柱绕流势流 ψ、Stokes 第一问题、Airy 重力波×2 色散、有限杆热传导 |
 
 **节点曲面均经数值验证**（`verify_nodes.py`）：Kummer 16 节点、Barth 六次 50 仿射实节点、Barth 十次 300 仿射实节点（壳层分布与文献完全吻合），验证方法为多起点 least-squares + 正二十面体对称群轨道补全 + 复步微分终验。
 
-**偏微分方程解均经有限差分残差门禁**（门禁已入库 `plot3d/gates/`：gate_pde.py 16/16、gate_pde2.py 13/13、gate_pde3.py 12/12，另 gate_simplify/gate_genus，`gates/run_all.sh` 一键全绿）：闭式解代回原方程（热方程 u_t=u_xx、KdV u_t+6uu_x+u_xxx=0、sine-Gordon u_tt−u_xx+sin u=0、波动方程本征模 ∇²u=−λu、定态薛定谔 Ĥψ=Eψ），相对残差 ≤1e-3；另验质量守恒 ∫u dx=1、节线/边界零点、本征值等结构性质。
+**偏微分方程解均经有限差分残差门禁**（门禁已入库 `plot3d/gates/`：gate_pde.py 16/16、gate_pde2.py 13/13、gate_pde3.py 12/12、gate_pde4.py 13/13，另 gate_simplify/gate_genus，`gates/run_all.sh` 一键全绿）：闭式解代回原方程（热方程 u_t=u_xx、KdV u_t+6uu_x+u_xxx=0、sine-Gordon u_tt−u_xx+sin u=0、波动方程本征模 ∇²u=−λu、定态薛定谔 Ĥψ=Eψ），相对残差 ≤1e-3；另验质量守恒 ∫u dx=1、节线/边界零点、本征值等结构性质。
 
 ---
 
@@ -120,14 +120,14 @@ plot3d/
 ├── spline_app.py        # Bézier/NURBS 样条设计器
 ├── engine3d.py          # 3D 矢量引擎（转台投影/SVG·EPS 导出）
 ├── mathparse.py         # 表达式解析层（AST 白名单/LaTeX 兼容）
-├── curve_library.py     # 内置图形库（125 条）
-├── gallery.py           # 画廊（缩略图+搜索+125 资料卡）
+├── curve_library.py     # 内置图形库（129 条）
+├── gallery.py           # 画廊（缩略图+搜索+129 资料卡）
 ├── atlas_gen.py         # 《曲线图鉴》单文件 HTML 生成器
 ├── nurbs.py             # NURBS 数学（含旋转面精确构造器）
 ├── surf_analysis.py     # 曲率分析（K + H）
 ├── export3d.py          # OBJ/STL 导出 + 截面工具
 ├── verify_nodes.py      # 节点曲面数值验证门禁
-├── thumbs/              # 缩略图缓存（128 张）
+├── thumbs/              # 缩略图缓存（132 张）
 ├── web/                 # 手机版 Web 应用
 │   ├── server.py        # 零依赖 HTTP 服务（几何采样 API）
 │   ├── geometry.py      # 无头几何采样层（numpy+skimage）

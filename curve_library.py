@@ -196,6 +196,15 @@ BUILTIN = {
     'ch_peakon': {'name': '浅水峰孤子 (Camassa-Holm)', 'category': '偏微分方程解',
                   'expr': 'z=exp(-abs(x-y)); x=-8..8, y=-4..4',
                   'desc': 'Camassa-Holm 方程（浅水渐近模型）峰孤子 u=c·e^(−|x−ct|), c=1：峰顶不可微的弱解、指数衰减尾；SWE 独波 sech² 与 KdV 单孤子同族已入库，故取峰孤子以示浅水族差异'},
+    'stokes_first': {'name': 'Stokes 第一问题（突然拖动平板）', 'category': '偏微分方程解',
+                     'expr': 'z=1-erf(x/(2*sqrt(0.2*y))); x=0..5, y=0.08..3',
+                     'desc': 'NS 非定常精确解 u=U·erfc(y/2√(νt))（ν=0.2，x 为离板距离、y 为时间）：无限大平板突然启动拖动黏性流体，边界层厚 ~√(νt) 随时间生长；库内首个 erf 条目'},
+    'airy_dispersion': {'name': 'Airy 重力波×2（深水色散）', 'category': '偏微分方程解',
+                        'expr': 'z=cos(2*x-sqrt(9.81*2)*y)+cos(3*x-sqrt(9.81*3)*y); x=-6..6, y=0..6',
+                        'desc': '线性化自由面重力波（Airy 波）双分量叠加：色散关系 ω²=gk（g=9.81，k=2/3），相速 c=√(g/k) 长波更快——两列波逐渐散开的拍频即深水波列色散的指纹'},
+    'heat_rod': {'name': '有限杆热传导（Fourier 级数）', 'category': '偏微分方程解',
+                 'expr': 'z=sin(pi*x)*exp(-pi^2*0.05*y)+0.5*sin(2*pi*x)*exp(-4*pi^2*0.05*y)+0.333*sin(3*pi*x)*exp(-9*pi^2*0.05*y); x=0..1, y=0..3',
+                 'desc': 'u_t=αu_xx（α=0.05）Dirichlet 两端固定零温的 IBVP 标准解：初温 Σbₙsin(nπx)（bₙ=1,1/2,1/3）被热传导按 e^{−n²π²αt} 逐模态指数过滤，高频先灭、只剩基模'},
     # ---------- 隐式曲面 F(x,y,z)=0 ----------
     'sphere': {'name': '球面 x²+y²+z²=4', 'category': '隐式曲面',
                'expr': 'x^2+y^2+z^2=4; x=-2.5..2.5, y=-2.5..2.5, z=-2.5..2.5',
@@ -407,6 +416,9 @@ _GEN_SPECS = {
     'gray_scott': {'name': 'Gray-Scott 反应扩散 Turing 斑图 (spots)', 'category': '偏微分方程解',
                    'gen': 'gray_scott', 'm': 128, 'iters': 6000, 'zscale': 1.0, 'faces_kind': 'heightfield',
                    'desc': 'Gray-Scott 反应扩散 Turing 斑图（spots/mitosis 参数 F=0.035, k=0.065, Du=0.16, Dv=0.08）：高度场=V 浓度，周期 Laplacian；数值解本身即展品（磁盘缓存 cache_grayscott.npy）'},
+    'flow_cylinder': {'name': '圆柱绕流势流（流函数 ψ）', 'category': '偏微分方程解',
+                      'gen': 'flow_cyl', 'n': 120, 'faces_kind': 'heightfield',
+                      'desc': '理想流体无旋流 ∇²ψ=0 的均匀流+偶极叠加解 ψ=Uy(1−a²/r²)：圆柱面 ψ=0 无穿透、远场 ψ→Uy、驻点 (±1,0)；达朗贝尔零阻力悖论的主角（圆柱内域剔除，仅 r≥a 出面）'},
 }
 try:
     import trisurf as _trisurf

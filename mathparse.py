@@ -29,6 +29,7 @@ FUNCS = {
     'sgn': lambda x: (x > 0) - (x < 0),
     'atan2': math.atan2, 'pow': pow, 'mod': lambda a, b: a % b,
     'min': min, 'max': max,
+    'erf': math.erf,
 }
 CONSTS = {'pi': math.pi, 'e': math.e, 'tau': math.tau}
 SAFE_GLOBALS = {'__builtins__': {}}

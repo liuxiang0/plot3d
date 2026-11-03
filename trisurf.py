@@ -221,9 +221,27 @@ def gray_scott(m=96, iters=4000, F=0.035, k=0.065, Du=0.16, Dv=0.08,
     return _heightfield_quads(V, zscale)
 
 
+def flow_cyl(n=120, lo=-2.5, hi=2.5, a=1.0, zscale=1.0):
+    """圆柱绕流势流流函数高度场 ψ=U·y(1−a²/r²)（U=a=1）。
+    ∇²ψ=0 的均匀流+偶极叠加解；仅在 r≥a 区域出面（圆柱体内部剔除），
+    圆柱面 ψ=0 即无穿透边界条件。"""
+    xs = np.linspace(lo, hi, n)
+    quads = []
+    a2 = a * a
+    for i in range(n - 1):
+        for j in range(n - 1):
+            corners = [(xs[i], xs[j]), (xs[i + 1], xs[j]),
+                       (xs[i + 1], xs[j + 1]), (xs[i], xs[j + 1])]
+            if any(px * px + py * py < a2 for px, py in corners):
+                continue                          # 含圆柱内点的格不出面
+            quads.append([[px, py, float(py * (1 - a2 / (px * px + py * py)) * zscale)]
+                          for px, py in corners])
+    return quads
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
-        'fdtd': fdtd, 'gray_scott': gray_scott}
+        'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}

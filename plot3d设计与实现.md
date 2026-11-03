@@ -1354,3 +1354,9 @@ PDE 族三批合计 12 条（①6 + ②3 + ③3），门禁 16+13+12=41 项全�
 cd ~/.openclaw/workspace/plot3d && python3 main_app.py   # 桌面（系统解释器，等价）
 cd ~/.openclaw/workspace && .venv/numina/bin/python plot3d/web/server.py --port 8030   # 手机
 ```
+
+
+## PDE 族④ 完成 ✅（流体×3 + 热传导×1）
+- flow_cylinder 圆柱绕流势流 ψ=y(1−1/r²)（gen 高度场，圆柱内域剔除；∇²ψ 残差 7.7e-4、柱面 ψ=0、驻点 (±1,0)、生成器顶点=解析 ψ）/ stokes_first Stokes 第一问题 u=erfc(x/2√(νt))（**mathparse 白名单新增 erf**；u_t=νu_yy 残差 2.6e-4 + 相似坍缩精确 0）/ airy_dispersion Airy 重力波×2（ω²=gk 模态方程残差 6.4e-4 / 1.2e-3）/ heat_rod 有限杆热传导 Fourier 级数（残差 4.0e-4、端零 6e-17、初值精确）
+- gate_pde4.py 13/13；库 129 builtin / 132 含用户；卡 129；图鉴 1.44MB；缩略图 4/4 QA（圆孔鞍面/边界层斜坡/色散拍频/衰减初温脊）
+- 物理覆盖：理想流体 Laplace / 黏性非定常 NS 精确解 / 表面重力波色散 / 热传导 IBVP（Fourier 1822）

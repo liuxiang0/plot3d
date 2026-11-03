@@ -4,7 +4,7 @@
 cd "$(dirname "$0")" || exit 1
 PY=/home/kumath/.openclaw/workspace/.venv/numina/bin/python
 [ -x "$PY" ] || PY=python3
-for g in gate_pde.py gate_pde2.py gate_pde3.py gate_simplify.py gate_genus.py; do
+for g in gate_pde.py gate_pde2.py gate_pde3.py gate_pde4.py gate_simplify.py gate_genus.py; do
   echo "===== $g"
   "$PY" "$g" || exit 1
 done
