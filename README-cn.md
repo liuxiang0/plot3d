@@ -55,7 +55,7 @@
 
 **节点曲面均经数值验证**（`verify_nodes.py`）：Kummer 16 节点、Barth 六次 50 仿射实节点、Barth 十次 300 仿射实节点（壳层分布与文献完全吻合），验证方法为多起点 least-squares + 正二十面体对称群轨道补全 + 复步微分终验。
 
-**偏微分方程解均经有限差分残差门禁**（`.openclaw/tmp/gate_pde.py` 16/16、gate_pde2.py 13/13、gate_pde3.py 12/12 全绿）：闭式解代回原方程（热方程 u_t=u_xx、KdV u_t+6uu_x+u_xxx=0、sine-Gordon u_tt−u_xx+sin u=0、波动方程本征模 ∇²u=−λu、定态薛定谔 Ĥψ=Eψ），相对残差 ≤1e-3；另验质量守恒 ∫u dx=1、节线/边界零点、本征值等结构性质。
+**偏微分方程解均经有限差分残差门禁**（门禁已入库 `plot3d/gates/`：gate_pde.py 16/16、gate_pde2.py 13/13、gate_pde3.py 12/12，另 gate_simplify/gate_genus，`gates/run_all.sh` 一键全绿）：闭式解代回原方程（热方程 u_t=u_xx、KdV u_t+6uu_x+u_xxx=0、sine-Gordon u_tt−u_xx+sin u=0、波动方程本征模 ∇²u=−λu、定态薛定谔 Ĥψ=Eψ），相对残差 ≤1e-3；另验质量守恒 ∫u dx=1、节线/边界零点、本征值等结构性质。
 
 ---
 

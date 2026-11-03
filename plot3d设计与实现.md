@@ -1324,3 +1324,33 @@ PDE 族三批合计 12 条（①6 + ②3 + ③3），门禁 16+13+12=41 项全�
 
 ---
 
+环境诊断完毕，结论与治理如下（提交 7e8159c）：
+
+一、到底哪个 Python 在跑什么
+
+| 用途 | 解释器 | 实测依赖栈 |
+| ----- | ----- | ----- |
+| 桌面 Tk 应用 / 缩略图 / 图鉴 | 系统 /usr/bin/python3（3.12 · Tk8.6 · PIL 12.1.1 · numpy 2.4.3 · scipy 1.17.1）——历来所有桌面命令用它；venv 同样能跑 | tkinter+PIL+numpy+scipy |
+| 手机 Web 服务 / verify_nodes / 亏格 / simplify 自检 | venv .venv/numina（= 系统栈 + scikit-image，是超集） | 左列 + skimage |
+| uv | 不适用：全项目无 pyproject.toml，uv run 会建临时空环境（无 PIL/numpy）→ 必然 ImportError | — |
+
+即：环境本身不乱，乱的是入口——venv ⊇ 系统栈，桌面端两者皆可，只有 web/门禁必须 venv（skimage）。
+
+二、您两次失败的真因
+
+- source …/activate 后 python main_app.py：venv 依赖栈我逐项验过全 OK（tkinter/PIL/numpy/scipy/skimage 均可导入）。失败几乎必然是 cwd——main_app.py 在 plot3d/ 里，在 workspace 根或 ~ 下跑报"文件不存在"。若 cd 进 plot3d 仍失败，下一嫌疑是 DISPLAY（Tk 需 WSLg/X；纯 TTY/SSH 无 $DISPLAY 时任何解释器都开不了窗——我这边的 shell 就无 DISPLAY；手机 Web 无头不受影响）。
+- uv run main_app.py：临时空环境无 PIL → 缩略图（PIL 离屏渲染）自然出不来。uv 不是本项目 runner。
+
+三、治理交付
+
+- plot3d/run.sh 启动器（已 +x）：自动 cd 到脚本目录 + 优先 venv 解释器、回退 python3——以后桌面端一条命令：workspace/plot3d/run.sh
+- README 新增「运行环境矩阵」节：用途×解释器表 + 四条误区（uv 不适用 / activate 后须 cd plot3d / Tk 需 DISPLAY / 缩略图 PIL 离屏两解释器皆可）
+- 结论归档 2026-11-03.md
+
+标准命令：
+
+```bash
+~/.openclaw/workspace/plot3d/run.sh                      # 桌面（推荐）
+cd ~/.openclaw/workspace/plot3d && python3 main_app.py   # 桌面（系统解释器，等价）
+cd ~/.openclaw/workspace && .venv/numina/bin/python plot3d/web/server.py --port 8030   # 手机
+```
