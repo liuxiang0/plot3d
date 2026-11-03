@@ -6,6 +6,7 @@
   geodesic      : 二十面体细分 freq² → 投影球面（Fuller 测地穹顶；等价于球面点集凸包/3D Delaunay）
   bezier_tri    : 三次三角 Bézier 片——参数域是三角形（非矩形），重心格点剖分
   terrain       : 散点采样 z=f(x,y) → scipy.spatial.Delaunay(2D) → 提升（点云路线，不新增顶点）
+  drum          : 圆膜 Bessel 模态 J₀(αr) 极坐标结构化格点 → 中心扇形 + 环带 quad 两三角（顶点精确）
   sph_tri_patch : 球面三角片（大圆边）——平面三角域重心格点剖分 → 归一化到球
 
 返回 faces = [ [[x,y,z]*3], ... ]（三角形多边形列表），与 polytopes.py 的 'faces' 机制同构，
@@ -117,8 +118,35 @@ def sph_tri_patch(m=20, R=2.0):
     return [[list(map(float, q)) for q in tri] for tri in _tris_from_lattice(rows)]
 
 
+def drum(nr=24, nth=64, alpha=2.404825557695773):
+    """圆膜基模 J₀(αr)：波动方程圆域本征解，α=j₀,₁≈2.40483 使边界 u(1)=0。
+
+    极坐标结构化格点，顶点解析精确落在 (r cosθ, r sinθ, J₀(αr))；
+    中心 r=0 退化环用扇形三角，其余环带每 quad 切两三角。
+    """
+    from scipy.special import j0
+    rs = np.linspace(0, 1, nr + 1)
+    ths = np.linspace(0, 2 * np.pi, nth + 1)          # 末列与首列位置重合，接缝闭合
+    P = np.empty((nr + 1, nth + 1, 3))
+    for i, r in enumerate(rs):
+        P[i, :, 0] = r * np.cos(ths)
+        P[i, :, 1] = r * np.sin(ths)
+        P[i, :, 2] = float(j0(alpha * r))
+    v = lambda p: [float(c) for c in p]
+    faces = []
+    for j in range(nth):                              # 中心扇形（r=0 全行同点）
+        faces.append([v(P[0, 0]), v(P[1, j]), v(P[1, j + 1])])
+    for i in range(1, nr):                            # 环带 quad → 两三角
+        for j in range(nth):
+            a, b = P[i, j], P[i, j + 1]
+            c, d = P[i + 1, j + 1], P[i + 1, j]
+            faces.append([v(a), v(b), v(c)])
+            faces.append([v(a), v(c), v(d)])
+    return faces
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
-        'terrain': terrain, 'sph_tri_patch': sph_tri_patch}
+        'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc'}

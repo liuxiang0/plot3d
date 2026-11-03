@@ -168,6 +168,22 @@ BUILTIN = {
     'ripple': {'name': '涟漪 \\frac{sin r}{r}', 'category': '经典曲面',
                'expr': r'z=\frac{\sin(\sqrt{x^2+y^2})}{\sqrt{x^2+y^2}+0.001}; x=-12..12, y=-12..12',
                'desc': 'sinc 径向波，LaTeX 分式示例'},
+    # ---------- 偏微分方程解（闭式解，FD 残差门禁 16/16 全绿：.openclaw/tmp/gate_pde.py）----------
+    'heat_kernel': {'name': '热方程基本解（高斯核）', 'category': '偏微分方程解',
+                    'expr': 'z=exp(-x^2/(4*y))/sqrt(4*pi*y); x=-4..4, y=0.12..2',
+                    'desc': 'u_t=u_xx 的基本解 u=exp(−x²/4t)/√(4πt)，y 轴为时间 t：峰高 1/√(4πt) 衰减、宽度 √(2t) 扩散，总热量 ∫u dx=1 守恒'},
+    'kdv_soliton': {'name': 'KdV 单孤子 2sech²(x−4t)', 'category': '偏微分方程解',
+                    'expr': 'z=2/cosh(x-4*y)^2; x=-10..10, y=0..4',
+                    'desc': 'u_t+6uu_x+u_xxx=0 的行波解：峰高 2、速度 4 沿脊线 x=4t 平移不变形——非线性与色散精确相消（Zabusky-Kruskal 1965 命名 soliton）'},
+    'sg_breather': {'name': 'sine-Gordon 呼吸子', 'category': '偏微分方程解',
+                    'expr': 'z=4*atan(0.8*sin(0.6*y)/(0.6*cosh(0.8*x))); x=-8..8, y=0..10.47',
+                    'desc': 'u_tt−u_xx+sin u=0 的束缚呼吸解（ω=0.6，√(1−ω²)=0.8）：空间局域 cosh 衰减、时间周期 2π/ω≈10.47 振荡，t=π/ω 处瞬时归零'},
+    'membrane_rect': {'name': '矩形膜 Chladni 模态 (3,2)', 'category': '偏微分方程解',
+                      'expr': 'z=sin(3*pi*x)*sin(2*pi*y); x=0..1, y=0..1',
+                      'desc': '波动方程本征模 ∇²u=−13π²u：四边固定零点，节线 x=1/3、2/3 与 y=1/2——板上撒沙聚于节线成 Chladni 图案'},
+    'qho_eigen': {'name': '量子谐振子本征态 ψ₂ψ₂', 'category': '偏微分方程解',
+                  'expr': 'z=(4*x^2-2)*(4*y^2-2)*exp(-(x^2+y^2)/2); x=-3..3, y=-3..3',
+                  'desc': '定态薛定谔方程 Ĥψ=Eψ（ħ=m=ω=1，E=n_x+n_y+1=5）：H₂ 厄米多项式×高斯，节线 x,y=±1/√2 分四叶正负交替'},
     # ---------- 隐式曲面 F(x,y,z)=0 ----------
     'sphere': {'name': '球面 x²+y²+z²=4', 'category': '隐式曲面',
                'expr': 'x^2+y^2+z^2=4; x=-2.5..2.5, y=-2.5..2.5, z=-2.5..2.5',
@@ -370,6 +386,9 @@ _GEN_SPECS = {
     'sph_tri_patch': {'name': '球面三角片 (大圆边)', 'category': '三角剖分曲面',
                       'gen': 'sph_tri_patch', 'm': 20, 'R': 2.0,
                       'desc': '平面三角域重心格点三角剖分 → 归一化到球面；三条边为大圆弧'},
+    'drum_bessel': {'name': '圆膜基模 J₀(αr) 鼓面', 'category': '偏微分方程解',
+                    'gen': 'drum', 'nr': 24, 'nth': 64,
+                    'desc': '波动方程圆膜本征模 ∇²u=−α²u，α=j₀,₁≈2.40483 使边界 u(1)=0：极坐标结构化格点三角剖分（中心扇形+环带双三角），顶点精确落在 J₀ 曲面上；鼓皮基音模态，“听不出鼓的形状”名题主角'},
 }
 try:
     import trisurf as _trisurf
