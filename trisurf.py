@@ -239,9 +239,43 @@ def flow_cyl(n=120, lo=-2.5, hi=2.5, a=1.0, zscale=1.0):
     return quads
 
 
+def blasius(nx=64, ny=64, x0=0.25, x1=4.0, y1=2.0, nu_U=0.04,
+            cache='cache_blasius.npy'):
+    """Blasius 层流平板边界层 u/U=f'(η), η=y/√(νx/U) 高度场。
+    相似方程 f'''+½ff''=0 打靶 f''(0)=0.33206 数值解（磁盘缓存）。"""
+    import os
+    cpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), cache)
+    if os.path.exists(cpath):
+        eta, fp = np.load(cpath)
+    else:
+        from scipy.integrate import solve_ivp
+
+        def rhs(e, w):
+            f, fp_, fpp = w
+            return [fp_, fpp, -0.5 * f * fpp]
+        sol = solve_ivp(rhs, [0, 8], [0, 0, 0.33206], dense_output=True,
+                        rtol=1e-10, atol=1e-12, max_step=0.01)
+        eta = np.linspace(0, 8, 400)
+        fp = sol.sol(eta)[1]
+        np.save(cpath, np.array([eta, fp]))
+    xs = np.linspace(x0, x1, nx)
+    ys = np.linspace(0, y1, ny)
+    quads = []
+    for i in range(nx - 1):
+        for j in range(ny - 1):
+            pts = []
+            for X, Y in ((xs[i], ys[j]), (xs[i + 1], ys[j]),
+                         (xs[i + 1], ys[j + 1]), (xs[i], ys[j + 1])):
+                e = Y / math.sqrt(nu_U * X)
+                pts.append([float(X), float(Y), float(np.interp(e, eta, fp))])
+            quads.append(pts)
+    return quads
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
-        'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl}
+        'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl,
+        'blasius': blasius}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}

@@ -1360,3 +1360,11 @@ cd ~/.openclaw/workspace && .venv/numina/bin/python plot3d/web/server.py --port 
 - flow_cylinder 圆柱绕流势流 ψ=y(1−1/r²)（gen 高度场，圆柱内域剔除；∇²ψ 残差 7.7e-4、柱面 ψ=0、驻点 (±1,0)、生成器顶点=解析 ψ）/ stokes_first Stokes 第一问题 u=erfc(x/2√(νt))（**mathparse 白名单新增 erf**；u_t=νu_yy 残差 2.6e-4 + 相似坍缩精确 0）/ airy_dispersion Airy 重力波×2（ω²=gk 模态方程残差 6.4e-4 / 1.2e-3）/ heat_rod 有限杆热传导 Fourier 级数（残差 4.0e-4、端零 6e-17、初值精确）
 - gate_pde4.py 13/13；库 129 builtin / 132 含用户；卡 129；图鉴 1.44MB；缩略图 4/4 QA（圆孔鞍面/边界层斜坡/色散拍频/衰减初温脊）
 - 物理覆盖：理想流体 Laplace / 黏性非定常 NS 精确解 / 表面重力波色散 / 热传导 IBVP（Fourier 1822）
+
+
+## PDE 族⑤ 完成 ✅（弹性波×2 + 空气动力学×2）
+- rayleigh_wave Rayleigh 面波（弹性半空间 ν=0.25：双衰逝模 w=(−Aq e^{−qy}+Bk e^{−sy})cos kx；门禁二分精解 Rayleigh 方程 c_R=0.919402，自由面 σ_zz=σ_xz=0 达 1e-16，深度局域 0.62）——地震地滚波/达朗贝尔族弹性版
+- beam_flexural Euler-Bernoulli 梁弯曲波（η_tt+η_xxxx=0，ω=k² 强色散，符号残差 1.8e-15）
+- blasius_bl Blasius 层流平板边界层（gen 高度场+缓存；f‴+½ff″=0 打靶 f″(0)=0.33206→f′(8)=1.00000；**坑：0.4696 是 f‴+ff″=0 约定的常数，两约定混用致 f′ 过冲 1.26**）
+- mach_lines 超音速小扰动 Mach 线（M=1.2 双曲型 (1−M²)φ_xx+φ_yy=0，β 须 12 位否则库式-符号式差 4.6e-7；Mach 角恒等 sinμ=1/M）
+- gate_pde5.py 15/15（挂 run_all.sh）；库 133 builtin/136 含用户；卡 133；图鉴 1.46MB；缩略图 4/4 QA

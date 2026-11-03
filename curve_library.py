@@ -205,6 +205,18 @@ BUILTIN = {
     'heat_rod': {'name': '有限杆热传导（Fourier 级数）', 'category': '偏微分方程解',
                  'expr': 'z=sin(pi*x)*exp(-pi^2*0.05*y)+0.5*sin(2*pi*x)*exp(-4*pi^2*0.05*y)+0.333*sin(3*pi*x)*exp(-9*pi^2*0.05*y); x=0..1, y=0..3',
                  'desc': 'u_t=αu_xx（α=0.05）Dirichlet 两端固定零温的 IBVP 标准解：初温 Σbₙsin(nπx)（bₙ=1,1/2,1/3）被热传导按 e^{−n²π²αt} 逐模态指数过滤，高频先灭、只剩基模'},
+    'rayleigh_wave': {'name': 'Rayleigh 面波（弹性半空间）', 'category': '偏微分方程解',
+                      'expr': 'z=(-0.847486*exp(-0.847486*y)+1.467892*exp(-0.393317*y))*cos(x); x=0..12.566, y=0..3',
+                      'desc': '弹性半空间 Rayleigh 表面波（ν=0.25, c_R=0.9194β）t=0 竖直位移 w(x,深度y)：双衰逝模 (q,s) 叠加、振幅随深度指数局域；门禁验自由面零牵引+波动方程'},
+    'beam_flexural': {'name': 'Euler-Bernoulli 梁弯曲波（ω∝k²）', 'category': '偏微分方程解',
+                      'expr': 'z=cos(2*x-4*y)+cos(3*x-9*y); x=-6..6, y=0..4',
+                      'desc': '梁弯曲波强色散 η_tt+η_xxxx=0（EI/ρA=1）：ω=k² 故 k=2,3 对应 ω=4,9——弹性波色散 ω∝k² 与重力波 ω∝√k 对照，双分量拍频'},
+    'mach_lines': {'name': '超音速小扰动 Mach 线 (M=1.2)', 'category': '偏微分方程解',
+                   'expr': 'z=cos(2*(x-0.663324958071*y))+0.6*cos(3*(x+0.663324958071*y)); x=-6..6, y=0..6',
+                   'desc': '超音速小扰动理论 (1−M²)φ_xx+φ_yy=0（M=1.2 双曲型）：扰动仅沿 Mach 线 x∓βy=const 传播（β=√(M²−1)=0.6633，sinμ=1/M）；左右行波族叠加'},
+    'blasius_bl': {'name': 'Blasius 层流边界层（平板）', 'category': '偏微分方程解',
+                   'gen': 'blasius', 'faces_kind': 'heightfield',
+                   'desc': '定常 NS 层流平板边界层相似解 u/U=f′(η), η=y/√(νx/U)：f‴+½ff″=0、f″(0)=0.33206、δ∼√(νx/U) 沿板生长；高度场=速度剖面族，数值相似解本身即展品（磁盘缓存）'},
     # ---------- 隐式曲面 F(x,y,z)=0 ----------
     'sphere': {'name': '球面 x²+y²+z²=4', 'category': '隐式曲面',
                'expr': 'x^2+y^2+z^2=4; x=-2.5..2.5, y=-2.5..2.5, z=-2.5..2.5',
@@ -419,6 +431,9 @@ _GEN_SPECS = {
     'flow_cylinder': {'name': '圆柱绕流势流（流函数 ψ）', 'category': '偏微分方程解',
                       'gen': 'flow_cyl', 'n': 120, 'faces_kind': 'heightfield',
                       'desc': '理想流体无旋流 ∇²ψ=0 的均匀流+偶极叠加解 ψ=Uy(1−a²/r²)：圆柱面 ψ=0 无穿透、远场 ψ→Uy、驻点 (±1,0)；达朗贝尔零阻力悖论的主角（圆柱内域剔除，仅 r≥a 出面）'},
+    'blasius_bl': {'name': 'Blasius 层流边界层（平板）', 'category': '偏微分方程解',
+                   'gen': 'blasius', 'faces_kind': 'heightfield',
+                   'desc': '定常 NS 层流平板边界层相似解 u/U=f′(η), η=y/√(νx/U)：f‴+½ff″=0、f″(0)=0.33206、δ∼√(νx/U) 沿板生长；高度场=速度剖面族，数值相似解本身即展品（磁盘缓存）'},
 }
 try:
     import trisurf as _trisurf
