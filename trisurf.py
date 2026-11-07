@@ -306,10 +306,121 @@ def karman(n=160, x0=-4.0, x1=4.0, y0=-1.0, y1=1.0, a=1.0, b=0.28054,
             for i, j in zip(ii.tolist(), jj.tolist())]
 
 
+def love(nx=170, nz=120, x1=6.2832, z1=3.0, H=1.0, b1=1.0, b2=1.4,
+         mu1=1.0, mu2=2.0, kH=4.0, zscale=1.0):
+    """Love 波高度场：低速层覆盖半空间的 SH 面波（Love 1911）。
+
+    传播沿 x，深度 z 向下；位移 u_y = v(z)·cos(kx)（水平横向极化）。
+    层内 (0<z<H) v=cos(κ₁z)（应力自由面 v'(0)=0），半空间 v=cos(κ₁H)e^{−κ₂(z−H)}；
+    频散方程 μ₁κ₁tan(κ₁H)=μ₂κ₂，κ₁=√(ω²/β₁²−k²)、κ₂=√(k²−ω²/β₂²)，基模 κ₁H∈(0,π/2)。
+    相速度 c 由二分精解；界面处 v 连续、斜率按 μ₂/μ₁ 跳变（剪应力连续）。
+    """
+    k = kH / H
+
+    def kappa(c):
+        k1 = math.sqrt(max((c * k / b1) ** 2 - k * k, 0.0))
+        k2 = math.sqrt(max(k * k - (c * k / b2) ** 2, 0.0))
+        return k1, k2
+
+    def disp(c):
+        k1, k2 = kappa(c)
+        return mu1 * k1 * math.tan(k1 * H) - mu2 * k2
+
+    c_hi = b1 * math.sqrt(1.0 + (math.pi / (2.0 * kH)) ** 2)   # κ₁H=π/2 处 tan 发散
+    lo, hi = b1 * (1.0 + 1e-12), c_hi * (1.0 - 1e-12)
+    for _ in range(90):
+        mid = 0.5 * (lo + hi)
+        if disp(lo) * disp(mid) <= 0:
+            hi = mid
+        else:
+            lo = mid
+    c = 0.5 * (lo + hi)
+    k1, k2 = kappa(c)
+    cH = math.cos(k1 * H)
+
+    def vprof(z):
+        return np.where(z <= H, np.cos(k1 * z), cH * np.exp(-k2 * (z - H)))
+
+    xs = np.linspace(0.0, x1, nx).tolist()
+    zs = np.linspace(0.0, z1, nz).tolist()
+    X, Z = np.meshgrid(np.asarray(xs), np.asarray(zs), indexing='ij')
+    U = (vprof(Z) * np.cos(k * X) * zscale).tolist()
+    return [[[xs[i], zs[j], U[i][j]],
+             [xs[i + 1], zs[j], U[i + 1][j]],
+             [xs[i + 1], zs[j + 1], U[i + 1][j + 1]],
+             [xs[i], zs[j + 1], U[i][j + 1]]]
+            for i in range(nx - 1) for j in range(nz - 1)]
+
+
+def prandtl_meyer(nx=180, ny=140, x0=-2.0, x1=4.0, y0=-1.5, y1=3.0,
+                  M1=2.0, thw=None, gamma=1.4, rcore=0.15, zscale=2.0):
+    """Prandtl-Meyer 膨胀波高度场：超音速流绕凸角偏转的中心简单波（M 场）。
+
+    来流 M₁ 沿 +x，壁面在原点外折 θ_w（凸角）；膨胀扇自原点发出，
+    前缘特征线 φ₁=μ₁=arcsin(1/M₁)，后缘 φ₂=μ₂−θ_w；扇内等熵无旋精确解：
+        ν(M)=ν(M₁)−θ,  φ=θ+μ(M)  （θ 为流向偏转角，μ 为 Mach 角）
+    对 M∈[M₁,M₂] 单调 ⇒ 逐点向量二分；扇外为均匀区 M₁/M₂。
+    壁体（x<0,y<0 与 x>0,y<−x·tanθ_w）及角点 r<rcore 奇异域不出面。
+    高度 z=(M−M₁)·zscale：上游平台→扇内斜坡→下游平台，等 M 线为过角点的射线。
+    """
+    if thw is None:
+        thw = math.radians(20.0)
+    g1 = (gamma - 1.0) / 2.0
+
+    def nu(M):
+        return (math.sqrt((gamma + 1.0) / (gamma - 1.0))
+                * np.arctan(np.sqrt(g1 / (g1 + 1.0) * (M * M - 1.0)))
+                - np.arctan(np.sqrt(M * M - 1.0)))
+
+    nu1 = float(nu(np.array(M1)))
+    lo, hi = M1, 12.0
+    for _ in range(80):                       # ν(M₂)=ν₁+θ_w
+        mid = 0.5 * (lo + hi)
+        if float(nu(np.array(mid))) < nu1 + thw:
+            lo = mid
+        else:
+            hi = mid
+    M2 = 0.5 * (lo + hi)
+    phi1 = math.asin(1.0 / M1)
+    phi2 = math.asin(1.0 / M2) - thw
+
+    def phi_of_M(M):
+        return nu1 - nu(M) + np.arcsin(1.0 / M)
+
+    xs = np.linspace(x0, x1, nx)
+    ys = np.linspace(y0, y1, ny)
+    X, Y = np.meshgrid(xs, ys, indexing='ij')
+    R = np.sqrt(X * X + Y * Y)
+    PHI = np.arctan2(Y, X)
+    target = np.clip(PHI, phi2, phi1)
+    blo, bhi = np.full(X.shape, M1), np.full(X.shape, M2)
+    for _ in range(48):                       # 向量二分: phi_of_M 单调减 ⇒ cond 真则根在右
+        mid = 0.5 * (blo + bhi)
+        cond = phi_of_M(mid) > target
+        blo = np.where(cond, mid, blo)
+        bhi = np.where(cond, bhi, mid)
+    M = 0.5 * (blo + bhi)
+    M = np.where(PHI > phi1, M1, M)
+    M = np.where(PHI < phi2, M2, M)
+
+    body = ((X < 0) & (Y < 0)) | ((X >= 0) & (Y < -X * math.tan(thw)))
+    bad = body | (R < rcore)
+    Z = ((M - M1) * zscale).tolist()
+    xl, yl = xs.tolist(), ys.tolist()
+    valid = ~(bad[:-1, :-1] | bad[1:, :-1] | bad[1:, 1:] | bad[:-1, 1:])
+    ii, jj = np.nonzero(valid)
+    return [[[xl[i], yl[j], Z[i][j]],
+             [xl[i + 1], yl[j], Z[i + 1][j]],
+             [xl[i + 1], yl[j + 1], Z[i + 1][j + 1]],
+             [xl[i], yl[j + 1], Z[i][j + 1]]]
+            for i, j in zip(ii.tolist(), jj.tolist())]
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
         'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl,
-        'blasius': blasius, 'karman': karman}
+        'blasius': blasius, 'karman': karman, 'love': love,
+        'prandtl_meyer': prandtl_meyer}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}

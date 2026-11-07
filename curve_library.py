@@ -434,6 +434,12 @@ _GEN_SPECS = {
     'karman_street': {'name': 'Kármán 涡街（点涡阵列流函数）', 'category': '偏微分方程解',
                       'gen': 'karman', 'faces_kind': 'heightfield',
                       'desc': '双排交错点涡阵列的精确流函数（von Kármán 1911）：上排 +Γ 在 (na, b/2)、下排 −Γ 错半距在 (na+a/2, −b/2)，∇²ψ=0（除涡核）；整街以 U=(Γ/2a)tanh(πb/a) 刚性平移，且仅 b/a=0.28054 中性稳定（门禁实测其余比值扰动指数放大 10³×）；高度场=ψ，涡核对数奇异域剔除'},
+    'love_wave': {'name': 'Love 波（低速层上的 SH 面波）', 'category': '偏微分方程解',
+                  'gen': 'love', 'faces_kind': 'heightfield',
+                  'desc': 'Love 1911：低速弹性层（β₁, μ₁, 厚 H）覆于高速半空间（β₂>β₁）上的 SH 面波——位移水平且垂直传播方向；层内 v=cos(κ₁z) 振荡、半空间 v∝e^{−κ₂(z−H)} 衰逝（低速层即波导）；频散方程 μ₁κ₁tan(κ₁H)=μ₂κ₂ 门禁二分精解（基模 kH=4, c=1.0534）；高度场=横向位移 u_y=v(z)cos(kx)，界面斜率按 μ₂/μ₁ 跳变（剪应力连续）'},
+    'prandtl_meyer': {'name': 'Prandtl-Meyer 膨胀波（超音速凸角）', 'category': '偏微分方程解',
+                      'gen': 'prandtl_meyer', 'faces_kind': 'heightfield',
+                      'desc': '超音速流绕凸角外折 θ_w 产生的中心简单波（M₁=2.0, θ_w=20°, γ=1.4）：膨胀扇自角点发出，前缘 φ₁=μ₁=arcsin(1/M₁)、后缘 φ₂=μ₂−θ_w；扇内等熵无旋精确解 ν(M)=ν(M₁)−θ、φ=θ+μ(M)，M 由 M₁ 单调升至 M₂=2.831；高度场=(M−M₁)·zscale，等 M 线为过角点射线；壁体与角点奇异域剔除'},
 }
 try:
     import trisurf as _trisurf
