@@ -214,9 +214,6 @@ BUILTIN = {
     'mach_lines': {'name': '超音速小扰动 Mach 线 (M=1.2)', 'category': '偏微分方程解',
                    'expr': 'z=cos(2*(x-0.663324958071*y))+0.6*cos(3*(x+0.663324958071*y)); x=-6..6, y=0..6',
                    'desc': '超音速小扰动理论 (1−M²)φ_xx+φ_yy=0（M=1.2 双曲型）：扰动仅沿 Mach 线 x∓βy=const 传播（β=√(M²−1)=0.6633，sinμ=1/M）；左右行波族叠加'},
-    'blasius_bl': {'name': 'Blasius 层流边界层（平板）', 'category': '偏微分方程解',
-                   'gen': 'blasius', 'faces_kind': 'heightfield',
-                   'desc': '定常 NS 层流平板边界层相似解 u/U=f′(η), η=y/√(νx/U)：f‴+½ff″=0、f″(0)=0.33206、δ∼√(νx/U) 沿板生长；高度场=速度剖面族，数值相似解本身即展品（磁盘缓存）'},
     # ---------- 隐式曲面 F(x,y,z)=0 ----------
     'sphere': {'name': '球面 x²+y²+z²=4', 'category': '隐式曲面',
                'expr': 'x^2+y^2+z^2=4; x=-2.5..2.5, y=-2.5..2.5, z=-2.5..2.5',
@@ -434,6 +431,9 @@ _GEN_SPECS = {
     'blasius_bl': {'name': 'Blasius 层流边界层（平板）', 'category': '偏微分方程解',
                    'gen': 'blasius', 'faces_kind': 'heightfield',
                    'desc': '定常 NS 层流平板边界层相似解 u/U=f′(η), η=y/√(νx/U)：f‴+½ff″=0、f″(0)=0.33206、δ∼√(νx/U) 沿板生长；高度场=速度剖面族，数值相似解本身即展品（磁盘缓存）'},
+    'karman_street': {'name': 'Kármán 涡街（点涡阵列流函数）', 'category': '偏微分方程解',
+                      'gen': 'karman', 'faces_kind': 'heightfield',
+                      'desc': '双排交错点涡阵列的精确流函数（von Kármán 1911）：上排 +Γ 在 (na, b/2)、下排 −Γ 错半距在 (na+a/2, −b/2)，∇²ψ=0（除涡核）；整街以 U=(Γ/2a)tanh(πb/a) 刚性平移，且仅 b/a=0.28054 中性稳定（门禁实测其余比值扰动指数放大 10³×）；高度场=ψ，涡核对数奇异域剔除'},
 }
 try:
     import trisurf as _trisurf

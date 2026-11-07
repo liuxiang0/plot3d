@@ -272,10 +272,44 @@ def blasius(nx=64, ny=64, x0=0.25, x1=4.0, y1=2.0, nu_U=0.04,
     return quads
 
 
+def karman(n=160, x0=-4.0, x1=4.0, y0=-1.0, y1=1.0, a=1.0, b=0.28054,
+           G=1.0, core=0.055, zscale=2.0):
+    """Kármán 涡街流函数高度场：双排交错点涡阵列的精确解。
+
+    上排 +Γ 位于 (na, +b/2)，下排 −Γ 位于 (na+a/2, −b/2)；由无穷乘积恒等式
+    |sin(πz/a)|² = [cosh(2πy/a) − cos(2πx/a)]/2 得收敛闭式
+        ψ = −(Γ/4π)[ln(cosh(2π(y−h)/a) − cos(2πx/a))
+                   − ln(cosh(2π(y+h)/a) − cos(2π(x−a/2)/a))],  h = b/2
+    整条街以 U=(Γ/2a)tanh(πb/a) 刚性平移；b/a=0.28054 为 von Kármán 中性稳定比。
+    涡核 r<core 处 ψ~−(Γ/2π)ln r 对数奇异，该处格点不出面。
+    """
+    xs = np.linspace(x0, x1, n).tolist()
+    ys = np.linspace(y0, y1, n).tolist()
+    X, Y = np.meshgrid(np.asarray(xs), np.asarray(ys), indexing='ij')
+    h = b / 2.0
+    k = 2.0 * np.pi / a
+    t1 = np.cosh(k * (Y - h)) - np.cos(k * X)
+    t2 = np.cosh(k * (Y + h)) - np.cos(k * (X - a / 2.0))
+    P = (-(G / (4.0 * np.pi)) * (np.log(t1) - np.log(t2)) * zscale).tolist()
+
+    bad = np.zeros(X.shape, dtype=bool)
+    nper = int(np.ceil((x1 - x0) / a)) + 2
+    for m in range(-nper, nper + 1):
+        bad |= (X - m * a) ** 2 + (Y - h) ** 2 < core * core
+        bad |= (X - m * a - a / 2.0) ** 2 + (Y + h) ** 2 < core * core
+    valid = ~(bad[:-1, :-1] | bad[1:, :-1] | bad[1:, 1:] | bad[:-1, 1:])
+    ii, jj = np.nonzero(valid)
+    return [[[xs[i], ys[j], P[i][j]],
+             [xs[i + 1], ys[j], P[i + 1][j]],
+             [xs[i + 1], ys[j + 1], P[i + 1][j + 1]],
+             [xs[i], ys[j + 1], P[i][j + 1]]]
+            for i, j in zip(ii.tolist(), jj.tolist())]
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
         'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl,
-        'blasius': blasius}
+        'blasius': blasius, 'karman': karman}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}
