@@ -86,6 +86,10 @@ ANIM_PRESETS = [
      'expr': 'x=v*cos(u), y=v*sin(u), z=u/w; u=0..4pi, v=-1..1, w=6',
      'param': 'w', 'lo': 2, 'hi': 12, 'step': 1,
      'desc': 'w 越大螺旋坡道越平缓（极小曲面族）'},
+    {'name': 'Kármán 涡街平移（时间 s）',
+     'expr': 'z=tanh((ln(cosh(2*pi*(y+0.14027))-cos(2*pi*(x-0.353545594*s-0.5)))-ln(cosh(2*pi*(y-0.14027))-cos(2*pi*(x-0.353545594*s))))/pi); x=-4..4, y=-1..1, s=0',
+     'param': 's', 'lo': 0.0, 'hi': 5.66, 'step': 0.08,
+     'desc': '整街以 U=(Γ/2a)tanh(πb/a)=0.3535 刚性右移；tanh 把涡核对数奇异夹成 ±1 涡团'},
 ]
 
 

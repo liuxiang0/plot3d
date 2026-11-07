@@ -440,6 +440,12 @@ _GEN_SPECS = {
     'prandtl_meyer': {'name': 'Prandtl-Meyer 膨胀波（超音速凸角）', 'category': '偏微分方程解',
                       'gen': 'prandtl_meyer', 'faces_kind': 'heightfield',
                       'desc': '超音速流绕凸角外折 θ_w 产生的中心简单波（M₁=2.0, θ_w=20°, γ=1.4）：膨胀扇自角点发出，前缘 φ₁=μ₁=arcsin(1/M₁)、后缘 φ₂=μ₂−θ_w；扇内等熵无旋精确解 ν(M)=ν(M₁)−θ、φ=θ+μ(M)，M 由 M₁ 单调升至 M₂=2.831；高度场=(M−M₁)·zscale，等 M 线为过角点射线；壁体与角点奇异域剔除'},
+    'rayleigh_taylor': {'name': 'Rayleigh-Taylor 界面（线性失稳模）', 'category': '偏微分方程解',
+                        'gen': 'rayleigh_taylor', 'faces_kind': 'heightfield',
+                        'desc': '重流体覆于轻流体上的界面失稳（Rayleigh 1883/Taylor 1950）：η=η₀cos(kx)e^{nt}，n²=gk(ρ₂−ρ₁)/(ρ₁+ρ₂)=gkA（A>0 指数失稳）；深流体极限扰动势 φ=∓(nη₀/k)e^{∓ky}cos(kx) 两区调和，垂直速度 w=nη₀e^{−k|y|}cos(kx) 界面连续、∂w/y 折角；高度场=w（ρ₁=1 下/ρ₂=2 上, k=2）'},
+    'n_wave': {'name': 'Sonic boom N 波（无黏 Burgers 自相似）', 'category': '偏微分方程解',
+               'gen': 'n_wave', 'faces_kind': 'heightfield',
+               'desc': '声爆 N 波：u_t+cu_x+βuu_x=0 的自相似弱解 u=(x−ct)/(βt)（|x−ct|<a√t），头尾激波 x=ct±a√t 速率 c+a/(2√t) 恰为 Rankine-Hugoniot；幅值∝t^{−1/2}、宽度∝t^{1/2}（∫|u|dξ=a²/β 守恒）、零均值；高度场=u(x,t)：N 形斜坡随时间展宽衰灭'},
 }
 try:
     import trisurf as _trisurf

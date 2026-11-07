@@ -416,11 +416,55 @@ def prandtl_meyer(nx=180, ny=140, x0=-2.0, x1=4.0, y0=-1.5, y1=3.0,
             for i, j in zip(ii.tolist(), jj.tolist())]
 
 
+def rayleigh_taylor(nx=160, ny=140, x1=6.283185307179586, y1=2.0, k=2.0, g=1.0,
+                    rho1=1.0, rho2=2.0, eta0=0.2, zscale=3.0):
+    """Rayleigh-Taylor 界面线性失稳模高度场：重流体在上（ρ₂>ρ₁）。
+
+    界面 η=η₀cos(kx)e^{nt}，n²=gk(ρ₂−ρ₁)/(ρ₁+ρ₂)=gkA（A>0 指数失稳）；
+    深流体极限下扰动流函数 φ=∓(nη₀/k)e^{∓ky}cos(kx)（两区调和），
+    垂直速度 w=∂φ/∂y=nη₀e^{−k|y|}cos(kx)：界面连续、∂w/∂y 按 ±k 跳变（折角）。
+    高度场=w(x,y)·zscale。
+    """
+    A = (rho2 - rho1) / (rho1 + rho2)
+    n = math.sqrt(g * k * A)
+    xs = np.linspace(0.0, x1, nx).tolist()
+    ys = np.linspace(-y1, y1, ny).tolist()
+    X, Y = np.meshgrid(np.asarray(xs), np.asarray(ys), indexing='ij')
+    W = (n * eta0 * np.exp(-k * np.abs(Y)) * np.cos(k * X) * zscale).tolist()
+    return [[[xs[i], ys[j], W[i][j]],
+             [xs[i + 1], ys[j], W[i + 1][j]],
+             [xs[i + 1], ys[j + 1], W[i + 1][j + 1]],
+             [xs[i], ys[j + 1], W[i][j + 1]]]
+            for i in range(nx - 1) for j in range(ny - 1)]
+
+
+def n_wave(nx=200, nt=120, x0=-1.0, x1=7.0, t0=1.0, t1=4.0,
+           c=1.0, beta=1.0, a=1.0, zscale=1.0):
+    """Sonic boom N 波高度场：无黏 Burgers u_t+cu_x+βuu_x=0 的自相似弱解。
+
+    u=(x−ct)/(βt)（|x−ct|<a√t），头尾激波在 x=ct±a√t（RH 速率为 c+a/(2√t)）；
+    幅值 ∝t^{−1/2}、宽度 ∝t^{1/2}（∫|u|dξ=a²/β 守恒）、零均值。
+    高度场=u(x,t)·zscale：N 形斜坡随时间展宽衰灭。
+    """
+    xs = np.linspace(x0, x1, nx).tolist()
+    ts = np.linspace(t0, t1, nt).tolist()
+    X, T = np.meshgrid(np.asarray(xs), np.asarray(ts), indexing='ij')
+    XI = X - c * T
+    U = np.where(np.abs(XI) < a * np.sqrt(T), XI / (beta * T), 0.0) * zscale
+    Ul = U.tolist()
+    return [[[xs[i], ts[j], Ul[i][j]],
+             [xs[i + 1], ts[j], Ul[i + 1][j]],
+             [xs[i + 1], ts[j + 1], Ul[i + 1][j + 1]],
+             [xs[i], ts[j + 1], Ul[i][j + 1]]]
+            for i in range(nx - 1) for j in range(nt - 1)]
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
         'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl,
         'blasius': blasius, 'karman': karman, 'love': love,
-        'prandtl_meyer': prandtl_meyer}
+        'prandtl_meyer': prandtl_meyer,
+        'rayleigh_taylor': rayleigh_taylor, 'n_wave': n_wave}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}

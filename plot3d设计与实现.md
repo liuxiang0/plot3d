@@ -1455,3 +1455,10 @@ PDE 族⑤ 完成 ✅ 提交 `76815d5`。弹性波 ×2 + 空气动力学 ×2：
 - gate_pde8.py 17/17：无旋+连续 FD 残差 3.6e-8/5.9e-8；特征关系自洽 5e-16；ν(∞)=130.45°（最大折角）
 - 坑两处：向量二分方向写反（φ_of_M 单调减，cond 真应取右半）致扇内场塌成 M₁；默认 thw=0.34906585 截断致 M₂ 偏 1.1e-9 → 改 math.radians(20.0)
 - 库 136 builtin / 139 含用户；卡 136；缩略图 139；图鉴 1.50MB；README 同步；web 重启带族⑦⑧
+
+## PDE 族⑨ + 涡街动画（19:54 点单「下一族候选全部做了」）：+2 条目 + 1 动画，库至 138 builtin / 141 含用户，卡 138
+- rayleigh_taylor Rayleigh-Taylor 界面线性失稳模（ρ₁=1 下/ρ₂=2 上, k=2）：n²=gkA=0.6667（n=0.816496581）；两区 φ 调和 + 运动学 w(0±)=∂η/t 符号精确；动力学边界条件代回残差 1.4e-16；界面折角 w_y(0±)=∓0.3266；A<0 振荡稳定对照
+- n_wave Sonic boom N 波（无黏 Burgers 自相似弱解）：扇内代回 u_t+cu_x+βuu_x=0 符号 0；Rankine-Hugoniot 符号恒等；∫|u|dξ=a²/β 守恒（t=1,2 均 1.0000002）；零均值；N 形过零恰 1 次
+- **Kármán 涡街时间滑杆**：ANIM_PRESETS 新增「涡街平移（时间 s）」（z=tanh((ln t2−ln t1)/π) 夹取涡核奇异，s∈[0,5.66]）；门禁独立复算 =tanh(4ψ(x−Us,y)) 差 1.1e-16、刚性平移自洽 0；gates/make_karman_gif.py 导出 output/karman_street_anim.gif（24 帧 1.22MB，帧间平移 QA 过）
+- gate_pde9.py 20/20（挂 run_all.sh，现 10 门禁脚本）；坑：φ 漏 e^{nt} 时频差（动力学残差恰 −1）；numpy2 无 trapz→trapezoid；mathparse 参数是重解析赋值而非 f 第三参（门禁改与 app 滑块同机制）
+- 缩略图 2/2 QA（RT 缝线状衰逝脊 / N 波双激波折带）；图鉴 1.52MB；README 138/138/141；web 重启带族⑨
