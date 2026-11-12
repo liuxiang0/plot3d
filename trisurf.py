@@ -695,6 +695,58 @@ def gn_bore(nx=200, nt=50, x0=-30.0, x1=60.0, T=20.0, hL=1.3, hR=1.0,
             for i in range(ni - 1) for j in range(nj - 1)]
 
 
+def sw_rarefaction(nx=200, nt=120, x0=-3.0, x1=3.0, t0=0.5, t1=3.0,
+                   g=1.0, hL=1.0, hR=0.25, zscale=1.0):
+    """浅水 dam-break 稀疏波（中心简单波扇）高度场 h(x,t)。
+
+    Riemann 初值在 1-族稀疏波曲线上（u_R=u_L+2(c_L−c_R)）⇒ 纯中心稀疏波：
+    扇内 ξ=x/t=u−c 且 u+2c=I=u_L+2c_L ⇒ c=(I−ξ)/3, u=(2ξ+I)/3, h=c²/g；
+    扇边 ξ₁=u_L−c_L、ξ₂=u_R−c_R 外为平台。与 bore 互为镜像：连续扇 vs 激波跳变。
+    """
+    cL, cR = math.sqrt(g * hL), math.sqrt(g * hR)
+    uL = 0.0
+    uR = uL + 2 * (cL - cR)
+    I = uL + 2 * cL
+    xi1, xi2 = uL - cL, uR - cR
+    xs = np.linspace(x0, x1, nx).tolist()
+    ts = np.linspace(t0, t1, nt).tolist()
+    X, T = np.meshgrid(np.asarray(xs), np.asarray(ts), indexing='ij')
+    XI = X / T
+    c = np.where(XI < xi1, cL, np.where(XI > xi2, cR, (I - XI) / 3.0))
+    H = (c * c / g * zscale).tolist()
+    return [[[xs[i], ts[j], H[i][j]],
+             [xs[i + 1], ts[j], H[i + 1][j]],
+             [xs[i + 1], ts[j + 1], H[i + 1][j + 1]],
+             [xs[i], ts[j + 1], H[i][j + 1]]]
+            for i in range(nx - 1) for j in range(nt - 1)]
+
+
+def _cnoidal_params(A=0.8, B=0.0, m=0.7):
+    """KdV u_t+6uu_x+u_xxx=0 的 cnoidal 行波 u=B+A·cn²(k(x−ct),m) 闭式参数：
+    C² 项平衡 ⇒ k²=A/(2m)；C¹ 项 ⇒ c=6B+4A−2A/m（m→1 退孤子 k²=A/2, c=6B+2A）。"""
+    k = math.sqrt(A / (2.0 * m))
+    c = 6.0 * B + 4.0 * A - 2.0 * A / m
+    return float(k), float(c)
+
+
+def kdv_cnoidal(nx=220, nt=120, x0=0.0, x1=12.0, t1=6.0,
+                A=0.8, B=0.0, m=0.7, zscale=1.0):
+    """KdV cnoidal 波高度场 u(x,t)=B+A·cn²(k(x−ct),m)——Whitham 调制理论的载波。
+    (k,c) 由 _cnoidal_params 数值精解；m→1 退孤子 sech²、m→0 退余弦。
+    """
+    from scipy.special import ellipj
+    k, c = _cnoidal_params(A, B, m)
+    xs = np.linspace(x0, x1, nx).tolist()
+    ts = np.linspace(0.0, t1, nt).tolist()
+    X, T = np.meshgrid(np.asarray(xs), np.asarray(ts), indexing='ij')
+    U = ((B + A * ellipj(k * (X - c * T), m)[1] ** 2) * zscale).tolist()
+    return [[[xs[i], ts[j], U[i][j]],
+             [xs[i + 1], ts[j], U[i + 1][j]],
+             [xs[i + 1], ts[j + 1], U[i + 1][j + 1]],
+             [xs[i], ts[j + 1], U[i][j + 1]]]
+            for i in range(nx - 1) for j in range(nt - 1)]
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
         'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl,
@@ -702,7 +754,8 @@ GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'prandtl_meyer': prandtl_meyer,
         'rayleigh_taylor': rayleigh_taylor, 'n_wave': n_wave,
         'oblique_shock': oblique_shock, 'gn_solitary': gn_solitary,
-        'burgers_tw': burgers_tw, 'gn_bore': gn_bore}
+        'burgers_tw': burgers_tw, 'gn_bore': gn_bore,
+        'sw_rarefaction': sw_rarefaction, 'kdv_cnoidal': kdv_cnoidal}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}

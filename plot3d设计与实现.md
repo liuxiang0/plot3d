@@ -1476,3 +1476,10 @@ PDE 族⑤ 完成 ✅ 提交 `76815d5`。弹性波 ×2 + 空气动力学 ×2：
 - gn_bore GN undular bore（Serre 数值解本体）：台阶 1.3→1.0，椭圆正则化三对角+SSP-RK3，2000 步；质量守恒 9.5e-7；crest=28 且调制递减（0.218/0.186/0.179）；**领先孤波速 1.0577 vs 族⑩同宿打靶 c(a_lead)=1.1016（−4%）**——两族交叉验证；bore 展宽 2.93→3.30；缓存 cache_gnbore.npy
 - gate_pde11.py 24/24（挂 run_all.sh，现 12 门禁脚本）；坑：表达式条目误入 _GEN_SPECS 致 KeyError 'gen'（移回 BUILTIN）；mathparse 参数域只认 x/y/z/t/u/v（极线改 t）；comps 是 dict；rh_res 的 p₁ 须 1/γ（a₁=ρ₁=1）；tanh 远场极限期望值左右写反
 - 缩略图 3/3 QA；图鉴 1.55MB；README 144/144/147；web 重启带族⑪
+
+## PDE 族⑫（11-12 15:15 点单「继续新候选」）：+3 条目，库至 147 builtin / 150 含用户，卡 147
+- sw_rarefaction 浅水 dam-break 稀疏波（Saint-Venant 纯中心稀疏波）：扇内 ξ=x/t=u−c、u+2c=I ⇒ c=(I−ξ)/3、h=c²/g；符号代回两方程 0；特征线 λ₁=x/t 恒等；扇边 C0；与 bore 镜像
+- stokes_drift Stokes 漂移与二阶剖面（表达式条目）：η=a cosθ+(ka²/2)cos2θ 峰尖谷平（不对称=ka² 精确）；ω²=gk(1+(ka)²)；**四周期粒子跟踪数值复现 u_S=ωka²e^{2kz}（a=0.01 时 1.8% 内）**
+- kdv_cnoidal KdV cnoidal 波（Whitham 载波）：u=B+A cn²(k(x−ct),m)，闭式 k²=A/(2m)、c=6B+4A−2A/m（C²/C¹ 项平衡手推）；FD 残差 2.1e-6；周期 2K(m)/k 精确；m→1 sech²（3.8e-5）/m→0 余弦（A=2mk² 固定 k）
+- gate_pde12.py 20/20（挂 run_all.sh，现 13 门禁脚本）；坑：ellipj 返回序 (sn,cn,dn,φ) 取 [1] 才是 cn（取 [0] 致 sn² 残差 0.29）；三阶中心差分符号反了（m=1 孤子残差 1.56 暴露）；d3 在 h=1e-4 浮点抵消 2e-4 → h=1e-3；Stokes 跟踪在 a=0.1 有三阶 O(ka) 修正 16% → 小幅区 a=0.01；mathparse 参数域只认 x/y/z/t/u/v
+- 缩略图 3/3 QA（连续扇斜坡/平移波纹/尖峰宽谷列）；图鉴 1.57MB；README 147/147/150；web 重启带族⑫

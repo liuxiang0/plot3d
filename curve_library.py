@@ -214,6 +214,10 @@ BUILTIN = {
     'mach_lines': {'name': '超音速小扰动 Mach 线 (M=1.2)', 'category': '偏微分方程解',
                    'expr': 'z=cos(2*(x-0.663324958071*y))+0.6*cos(3*(x+0.663324958071*y)); x=-6..6, y=0..6',
                    'desc': '超音速小扰动理论 (1−M²)φ_xx+φ_yy=0（M=1.2 双曲型）：扰动仅沿 Mach 线 x∓βy=const 传播（β=√(M²−1)=0.6633，sinμ=1/M）；左右行波族叠加'},
+    'stokes_drift': {'name': 'Stokes 漂移与二阶波剖面', 'category': '偏微分方程解',
+                     'expr': 'z=0.1*cos(x-1.004987562112089*y)+0.005*cos(2*(x-1.004987562112089*y)); '
+                             'x=0..12.566370614359172, y=0..6.283185307179586',
+                     'desc': '二阶 Stokes 波剖面 η=a cosθ+(ka²/2)cos2θ（k=1, a=0.1, g=1, ω²=gk(1+(ka)²)）：峰尖谷平；配套 Stokes 漂移 u_S=ωka²e^{2kz}——门禁以四周期粒子跟踪数值复现漂移（±3%）；高度场=η(x,t)'},
     'shock_polar': {'name': '激波极线（M₁=2.5 速端曲线）', 'category': '偏微分方程解',
                     'expr': 'x=2.5*sin(t)^2*(2.5*sin(t)^2+2)/(15*sin(t)^2)+2.5*cos(t)^2, '
                             'y=cos(t)*2.5*sin(t)*(1-(2.5*sin(t)^2+2)/(15*sin(t)^2)), z=0; t=0.42..1.5707',
@@ -465,6 +469,12 @@ _GEN_SPECS = {
     'gn_bore': {'name': 'GN undular bore（色散冲击波）', 'category': '偏微分方程解',
                 'gen': 'gn_bore', 'faces_kind': 'heightfield',
                 'desc': 'Serre/GN 方程台阶初值（h_L=1.3→h_R=1.0）数值解本体：undular bore——前缘 GN 孤波列（领先孤波速=同宿打靶 c）、后缘线性色散边、中间连续调制波列；椭圆正则化+SSP-RK3，缓存 cache_gnbore.npy；高度场=(h−h_R)·zscale'},
+    'sw_rarefaction': {'name': '浅水 dam-break 稀疏波', 'category': '偏微分方程解',
+                       'gen': 'sw_rarefaction', 'faces_kind': 'heightfield',
+                       'desc': 'Saint-Venant 方程纯中心稀疏波（Riemann 初值在 1-族稀疏波曲线上：u_R=u_L+2(c_L−c_R)）：扇内 ξ=x/t=u−c、u+2c=I ⇒ c=(I−ξ)/3、u=(2ξ+I)/3、h=c²/g；扇边 ξ₁=u_L−c_L、ξ₂=u_R−c_R 外平台；与 bore 镜像：连续扇 vs 激波跳变；高度场=h(x,t)'},
+    'kdv_cnoidal': {'name': 'KdV cnoidal 波（Whitham 载波）', 'category': '偏微分方程解',
+                    'gen': 'kdv_cnoidal', 'faces_kind': 'heightfield',
+                    'desc': 'KdV u_t+6uu_x+u_xxx=0 的 cnoidal 周期行波 u=B+A·cn²(k(x−ct),m)——Whitham 调制理论的载波（undular bore 内部的波即参数缓变的它）；(k,c) 由 fsolve+FD 数值精解；m→1 退 sech² 孤子、m→0 退余弦；高度场=u(x,t)'},
 }
 try:
     import trisurf as _trisurf
