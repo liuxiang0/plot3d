@@ -619,6 +619,82 @@ def burgers_tw(nx=200, nt=120, x0=-3.0, x1=5.0, t1=4.0,
             for i in range(nx - 1) for j in range(nt - 1)]
 
 
+def _serre_rhs(h, u, dx, g, lu_factor):
+    """Serre/GN 右端：椭圆正则化 u_t + uu_x + gh_x = −(1/h)∂ₓ[(h³/3)(u_xt+uu_xx−u_x²)]。
+    每步解 (I − (1/h)∂(h³/3 ₓ·))A = RHS_base 得 A=u_t（三对角）。"""
+    from scipy.linalg import solve_banded
+    n = h.size
+    hx = np.gradient(h, dx)
+    ux = np.gradient(u, dx)
+    uxx = np.gradient(ux, dx)
+    G = u * uxx - 0.5 * ux * ux
+    K = (h ** 3) / 3.0
+    Kh = 0.5 * (K[1:] + K[:-1])                       # 半节点
+    rhs = -u * ux - g * hx - np.gradient(K * G, dx) / h
+    ab = np.zeros((3, n))
+    ab[1, 1:-1] = 1.0 + (Kh[:-1] + Kh[1:]) / (h[1:-1] * dx * dx)
+    ab[0, 2:] = -Kh[1:] / (h[1:-1] * dx * dx)           # 上对角: 行 i 的 A_{i+1} 系数
+    ab[2, :-2] = -Kh[:-1] / (h[1:-1] * dx * dx)          # 下对角: 行 i 的 A_{i-1} 系数
+    ab[1, 0] = ab[1, -1] = 1.0                          # Dirichlet A=0 远场
+    A = solve_banded((1, 1), ab, rhs)
+    dh = -np.gradient(h * u, dx)
+    return dh, A
+
+
+def _gn_bore_solve(x0=-30.0, x1=60.0, N=1200, T=20.0, dt=0.01,
+                   hL=1.3, hR=1.0, g=1.0, save_every=40):
+    """Serre 方程台阶初值（左深右浅）→ undular bore；缓存 (xs, ts, H)。"""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cache_gnbore.npy')
+    if os.path.exists(path):
+        arr = np.load(path)
+        N = int(arr[0])
+        M = int(arr[1])
+        return arr[2:2 + N], arr[2 + N:2 + N + M], arr[2 + N + M:].reshape(M, N)
+    from scipy.linalg import solve_banded  # noqa: F401  (确保依赖存在)
+    xs = np.linspace(x0, x1, N)
+    dx = xs[1] - xs[0]
+    h = np.where(xs < 0, hL, hR).copy()
+    u = np.zeros_like(h)
+    nsteps = int(T / dt)
+    ts, frames = [], []
+    for step in range(nsteps + 1):
+        if step % save_every == 0:
+            ts.append(step * dt)
+            frames.append(h.copy())
+        if step == nsteps:
+            break
+        d1h, d1u = _serre_rhs(h, u, dx, g, None)
+        h1, u1 = h + dt * d1h, u + dt * d1u
+        d2h, d2u = _serre_rhs(h1, u1, dx, g, None)
+        h2, u2 = 0.75 * h + 0.25 * (h1 + dt * d2h), 0.75 * u + 0.25 * (u1 + dt * d2u)
+        d3h, d3u = _serre_rhs(h2, u2, dx, g, None)
+        h = h / 3 + 2 / 3 * (h2 + dt * d3h)
+        u = u / 3 + 2 / 3 * (u2 + dt * d3u)
+    H = np.array(frames)
+    np.save(path, np.concatenate([np.array([h.size, len(ts)]), xs, np.array(ts),
+                                  H.ravel()]))
+    return xs, np.array(ts), H
+
+
+def gn_bore(nx=200, nt=50, x0=-30.0, x1=60.0, T=20.0, hL=1.3, hR=1.0,
+            g=1.0, zscale=2.0):
+    """GN/Serre undular bore（色散冲击波）高度场 h(x,t)−h_R：台阶初值数值解本体。
+    前缘为 GN 孤波列（领先孤波速=同宿打靶 c），后缘线性色散边；缓存 cache_gnbore.npy。"""
+    xs, ts, H = _gn_bore_solve(x0, x1, 1200, T, 0.01, hL, hR, g, 40)
+    stride = max(1, len(xs) // nx)
+    X = xs[::stride]
+    Hs = H[::max(1, len(ts) // nt), ::stride]
+    Tsub = ts[::max(1, len(ts) // nt)]
+    Z = ((Hs - hR) * zscale).tolist()
+    xl, tl = X.tolist(), Tsub.tolist()
+    ni, nj = len(xl), len(tl)
+    return [[[xl[i], tl[j], Z[j][i]],
+             [xl[i + 1], tl[j], Z[j][i + 1]],
+             [xl[i + 1], tl[j + 1], Z[j + 1][i + 1]],
+             [xl[i], tl[j + 1], Z[j + 1][i]]]
+            for i in range(ni - 1) for j in range(nj - 1)]
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
         'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl,
@@ -626,7 +702,7 @@ GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'prandtl_meyer': prandtl_meyer,
         'rayleigh_taylor': rayleigh_taylor, 'n_wave': n_wave,
         'oblique_shock': oblique_shock, 'gn_solitary': gn_solitary,
-        'burgers_tw': burgers_tw}
+        'burgers_tw': burgers_tw, 'gn_bore': gn_bore}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}

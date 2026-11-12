@@ -214,6 +214,13 @@ BUILTIN = {
     'mach_lines': {'name': '超音速小扰动 Mach 线 (M=1.2)', 'category': '偏微分方程解',
                    'expr': 'z=cos(2*(x-0.663324958071*y))+0.6*cos(3*(x+0.663324958071*y)); x=-6..6, y=0..6',
                    'desc': '超音速小扰动理论 (1−M²)φ_xx+φ_yy=0（M=1.2 双曲型）：扰动仅沿 Mach 线 x∓βy=const 传播（β=√(M²−1)=0.6633，sinμ=1/M）；左右行波族叠加'},
+    'shock_polar': {'name': '激波极线（M₁=2.5 速端曲线）', 'category': '偏微分方程解',
+                    'expr': 'x=2.5*sin(t)^2*(2.5*sin(t)^2+2)/(15*sin(t)^2)+2.5*cos(t)^2, '
+                            'y=cos(t)*2.5*sin(t)*(1-(2.5*sin(t)^2+2)/(15*sin(t)^2)), z=0; t=0.42..1.5707',
+                    'desc': '斜激波下游速度端点随 β∈(μ₁,π/2) 的轨迹（速端曲线）：v_n2=v_n1·[(γ−1)M₁n²+2]/[(γ+1)M₁n²]、切向不变；最远偏转角=θ_max（切向即波角）；θ>θ_max 无附着解→脱体弓形激波/Mach 反射的数学源头；β→μ₁ 退回来流、β→π/2 为正激波点'},
+    'kdv_burgers': {'name': 'KdV-Burgers 复合波（tanh 精确行波）', 'category': '偏微分方程解',
+                    'expr': 'z=1.25-0.432*tanh(0.3*(x-1.034*y))-0.216*tanh(0.3*(x-1.034*y))^2; x=-6..10, y=0..6',
+                    'desc': 'u_t+uu_x+δu_xxx=νu_xx（ν=0.6, δ=0.2，Galilean 提升 V=2 后）精确行波：u=C+p·tanh(kξ)+q·tanh²(kξ)，k=ν/(10δ)=0.3、q=−12δk²、p=−12νk/5、s=1.034；耗散与色散平衡的复合锋（门禁全幂次残差 1e-17）'},
     # ---------- 隐式曲面 F(x,y,z)=0 ----------
     'sphere': {'name': '球面 x²+y²+z²=4', 'category': '隐式曲面',
                'expr': 'x^2+y^2+z^2=4; x=-2.5..2.5, y=-2.5..2.5, z=-2.5..2.5',
@@ -455,6 +462,9 @@ _GEN_SPECS = {
     'burgers_tw': {'name': '黏性 Burgers 行波（Taylor 激波）', 'category': '偏微分方程解',
                    'gen': 'burgers_tw', 'faces_kind': 'heightfield',
                    'desc': 'u_t+uu_x=νu_xx 精确行波（ν=0.05, u₁=1→u₂=−0.5）：u=u₂+(u₁−u₂)/(1+e^{(u₁−u₂)(x−st)/(2ν)})，s=(u₁+u₂)/2 恰为无黏 RH 速率（黏性选熵）；厚度∝ν/(u₁−u₂)；Cole-Hopf u=−2ν∂ₓlnφ 恒等；高度场=u(x,t)：平移的扩散激波锋'},
+    'gn_bore': {'name': 'GN undular bore（色散冲击波）', 'category': '偏微分方程解',
+                'gen': 'gn_bore', 'faces_kind': 'heightfield',
+                'desc': 'Serre/GN 方程台阶初值（h_L=1.3→h_R=1.0）数值解本体：undular bore——前缘 GN 孤波列（领先孤波速=同宿打靶 c）、后缘线性色散边、中间连续调制波列；椭圆正则化+SSP-RK3，缓存 cache_gnbore.npy；高度场=(h−h_R)·zscale'},
 }
 try:
     import trisurf as _trisurf

@@ -1469,3 +1469,10 @@ PDE 族⑤ 完成 ✅ 提交 `76815d5`。弹性波 ×2 + 空气动力学 ×2：
 - burgers_tw 黏性 Burgers 行波（Taylor 激波，ν=0.05）：符号 PDE 0；RH 速率恒等；Cole-Hopf 恒等 0；Lax 熵条件；厚度 8νln3/Δ=0.29296
 - gate_pde10.py 25/25（挂 run_all.sh，现 11 门禁脚本）；坑：sech² 非 Serre 精确解（第一积分残差 1.6e-3，手动波峰核算 L² 算术错所致）→ 改同宿打靶；打靶判据用尾段 min 符号（末值符号在小 a 失稳）；sympy Float(0.0)==0 为 False → 改 float 绝对值；numpy vstack 标量需 full_like
 - 缩略图 3/3 QA（双平台+直线悬崖缝 / 平移 sech² 脊 / 扩散锋台阶）；图鉴 1.53MB；README 141/141/144；web 重启带族⑩
+
+## PDE 族⑪（11-12 14:44 点单「继续候选池」）：+3 条目，库至 144 builtin / 147 含用户，卡 144
+- shock_polar 激波极线（M₁=2.5 速端曲线，参数曲线条目）：库式=门禁重算 2.2e-16；三条 RH 1.8e-15；端点 β→μ₁ 回来流/β→π/2 正激波点 u₂=0.75；极线最远偏转角=θ-β-M 的 θ_max=29.797426°（两路独立算一致）；声速点 β_s=56.513°；Mach 反射判据（35°>θ_max 无附着解）
+- kdv_burgers KdV-Burgers 复合波（表达式条目）：tanh 精确行波 u=C+p tanh+q tanh²（k=ν/10δ=0.3, q=−12δk², p=−12νk/5，手推+数值全幂次验证 1e-17；Galilean V=2 提速）；符号残差采样 2.6e-17
+- gn_bore GN undular bore（Serre 数值解本体）：台阶 1.3→1.0，椭圆正则化三对角+SSP-RK3，2000 步；质量守恒 9.5e-7；crest=28 且调制递减（0.218/0.186/0.179）；**领先孤波速 1.0577 vs 族⑩同宿打靶 c(a_lead)=1.1016（−4%）**——两族交叉验证；bore 展宽 2.93→3.30；缓存 cache_gnbore.npy
+- gate_pde11.py 24/24（挂 run_all.sh，现 12 门禁脚本）；坑：表达式条目误入 _GEN_SPECS 致 KeyError 'gen'（移回 BUILTIN）；mathparse 参数域只认 x/y/z/t/u/v（极线改 t）；comps 是 dict；rh_res 的 p₁ 须 1/γ（a₁=ρ₁=1）；tanh 远场极限期望值左右写反
+- 缩略图 3/3 QA；图鉴 1.55MB；README 144/144/147；web 重启带族⑪
