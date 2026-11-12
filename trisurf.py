@@ -14,6 +14,7 @@
 三路渲染（桌面/缩略图/手机）直接复用。
 """
 import math
+import os
 
 import numpy as np
 
@@ -459,12 +460,173 @@ def n_wave(nx=200, nt=120, x0=-1.0, x1=7.0, t0=1.0, t1=4.0,
             for i in range(nx - 1) for j in range(nt - 1)]
 
 
+def oblique_shock(nx=170, ny=140, x0=0.3, x1=4.0, y1=2.6, M1=2.5,
+                  thw=0.2617993877991494, gamma=1.4, zscale=1.0):
+    """斜激波高度场：超音速流遇凹角（楔角 θ_w）产生的附着斜激波（弱解）。
+
+    θ-β-M 关系 tanθ=2cotβ(M₁²sin²β−1)/(M₁²(γ+cos2β)+2) 扫描+二分精解弱解 β；
+    压强比 p₂/p₁=1+2γ/(γ+1)(M₁²sin²β−1)；高度场=(p/p₁−1)·zscale：
+    激波线 y=x·tanβ 上游 0、下游台阶（悬崖即激波）；楔体 y<x·tanθ_w 与跨激波格不出面。
+    """
+    mu1 = math.asin(1.0 / M1)
+
+    def tbm(b):
+        return (2.0 / math.tan(b) * (M1 * M1 * math.sin(b) ** 2 - 1.0)
+                / (M1 * M1 * (gamma + math.cos(2 * b)) + 2.0) - math.tan(thw))
+
+    nb = 4000
+    bs = [mu1 + 1e-9 + k * (math.pi / 2 - 1e-9 - mu1 - 1e-9) / nb for k in range(nb + 1)]
+    vs = [tbm(b) for b in bs]
+    beta = None
+    for k in range(nb):
+        if vs[k] < 0 < vs[k + 1]:
+            lo, hi = bs[k], bs[k + 1]
+            for _ in range(80):
+                mid = 0.5 * (lo + hi)
+                if tbm(lo) * tbm(mid) <= 0:
+                    hi = mid
+                else:
+                    lo = mid
+            beta = 0.5 * (lo + hi)
+            break
+    if beta is None:
+        raise ValueError('θ 超脱体角，无附着斜激波')
+    P21 = 1.0 + 2 * gamma / (gamma + 1) * (M1 * M1 * math.sin(beta) ** 2 - 1)
+    tb, tw = math.tan(beta), math.tan(thw)
+    xs = np.linspace(x0, x1, nx)
+    ys = np.linspace(0.0, y1, ny)
+    X, Y = np.meshgrid(xs, ys, indexing='ij')
+    Z = np.where(Y < X * tb, P21 - 1.0, 0.0) * zscale
+    body = Y < X * tw
+    cross = (Y - X * tb)
+    sgn = np.sign(cross)
+    bad = (body[:-1, :-1] | body[1:, :-1] | body[1:, 1:] | body[:-1, 1:]) \
+        | (sgn[:-1, :-1] != sgn[1:, :-1]) | (sgn[:-1, :-1] != sgn[1:, 1:]) \
+        | (sgn[:-1, :-1] != sgn[:-1, 1:])
+    Zl = Z.tolist()
+    xl, yl = xs.tolist(), ys.tolist()
+    ii, jj = np.nonzero(~bad)
+    return [[[xl[i], yl[j], Zl[i][j]],
+             [xl[i + 1], yl[j], Zl[i + 1][j]],
+             [xl[i + 1], yl[j + 1], Zl[i + 1][j + 1]],
+             [xl[i], yl[j + 1], Zl[i][j + 1]]]
+            for i, j in zip(ii.tolist(), jj.tolist())]
+
+
+def _gn_acc(h, hx, h0, g, c):
+    """稳态 Serre 第一积分解出 h_xx（关于 (h,h_x) 的自治 ODE）"""
+    return (3.0 * (h - h0) / (h0 * h)
+            - 3.0 * g * (h * h - h0 * h0) / (2.0 * c * c * h0 * h0)
+            + 1.5 * hx * hx / h)
+
+
+def _gn_shoot(h0, a, g, c, xmax=25.0, dx=2e-3):
+    """从波峰 (h=h0+a, h_x=0) RK4 积分到 xmax，返回 h(xmax)−h0（同宿轨道打靶）"""
+    h, hx = h0 + a, 0.0
+    n = int(xmax / dx)
+    tmin = 0.0
+    for i in range(n):
+        k1h, k1v = hx, _gn_acc(h, hx, h0, g, c)
+        k2h, k2v = hx + dx / 2 * k1v, _gn_acc(h + dx / 2 * k1h, hx + dx / 2 * k1v, h0, g, c)
+        k3h, k3v = hx + dx / 2 * k2v, _gn_acc(h + dx / 2 * k2h, hx + dx / 2 * k2v, h0, g, c)
+        k4h, k4v = hx + dx * k3v, _gn_acc(h + dx * k3h, hx + dx * k3v, h0, g, c)
+        h += dx / 6 * (k1h + 2 * k2h + 2 * k3h + k4h)
+        hx += dx / 6 * (k1v + 2 * k2v + 2 * k3v + k4v)
+        if h < h0 * 0.5 or h > h0 + 5 * a:
+            return -1.0
+        if i > n // 2:
+            tmin = min(tmin, h - h0)
+    return tmin
+
+
+def _gn_profile(h0=1.0, a=0.3, g=1.0, xmax=25.0, dx=2e-3):
+    """GN/Serre 精确孤波剖面（磁盘缓存）：对 c 二分打靶同宿轨道。
+    返回 (xs, eta, c)；xs∈[−xmax, xmax] 对称格。"""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        'cache_gn_%g_%g.npy' % (h0, a))
+    if os.path.exists(path):
+        arr = np.load(path)
+        return arr[0], arr[1], float(arr[2, 0])
+    ck = math.sqrt(g * h0) * (1 + a / (2 * h0))          # KdV 速度（下界候选）
+    lo, hi = ck * 0.98, math.sqrt(g * (h0 + a)) * 1.02
+    flo, fhi = _gn_shoot(h0, a, g, lo, xmax, dx), _gn_shoot(h0, a, g, hi, xmax, dx)
+    if flo * fhi > 0:                                     # 括号失败则外扩
+        lo, hi = ck * 0.9, math.sqrt(g * (h0 + a)) * 1.1
+        flo, fhi = _gn_shoot(h0, a, g, lo, xmax, dx), _gn_shoot(h0, a, g, hi, xmax, dx)
+    for _ in range(48):
+        mid = 0.5 * (lo + hi)
+        fm = _gn_shoot(h0, a, g, mid, xmax, dx)
+        if flo * fm <= 0:
+            hi = mid
+        else:
+            lo, flo = mid, fm
+    c = 0.5 * (lo + hi)
+    # 存全剖面：自波峰积分右半，偶对称拼左半（孤波关于波峰偶）
+    h, hx = h0 + a, 0.0
+    n = int(xmax / dx)
+    right = [a]
+    for _ in range(n):
+        k1h, k1v = hx, _gn_acc(h, hx, h0, g, c)
+        k2h, k2v = hx + dx / 2 * k1v, _gn_acc(h + dx / 2 * k1h, hx + dx / 2 * k1v, h0, g, c)
+        k3h, k3v = hx + dx / 2 * k2v, _gn_acc(h + dx / 2 * k2h, hx + dx / 2 * k2v, h0, g, c)
+        k4h, k4v = hx + dx * k3v, _gn_acc(h + dx * k3h, hx + dx * k3v, h0, g, c)
+        h += dx / 6 * (k1h + 2 * k2h + 2 * k3h + k4h)
+        hx += dx / 6 * (k1v + 2 * k2v + 2 * k3v + k4v)
+        right.append(h - h0)
+    right = np.array(right)
+    eta = np.concatenate([right[:0:-1], right])      # x=−xmax..xmax, 2n+1 点
+    xs = np.linspace(-xmax, xmax, 2 * n + 1)
+    np.save(path, np.vstack([xs, eta, np.full_like(xs, c)]))
+    return xs, eta, c
+
+
+def gn_solitary(nx=200, nt=120, x0=-6.0, x1=10.0, t1=4.0,
+                h0=1.0, a=0.3, g=1.0, zscale=1.0):
+    """Green-Naghdi/Serre 浅水孤波高度场 η(x−ct)：稳态第一积分 ODE 的同宿轨道
+    （对 c 二分打靶，磁盘缓存），非 sech² 近似；KdV 小幅极限→sech²。
+    """
+    xs_p, eta_p, c = _gn_profile(h0, a, g)
+    xs = np.linspace(x0, x1, nx).tolist()
+    ts = np.linspace(0.0, t1, nt).tolist()
+    X, T = np.meshgrid(np.asarray(xs), np.asarray(ts), indexing='ij')
+    E = (np.interp(X - c * T, xs_p, eta_p) * zscale).tolist()
+    return [[[xs[i], ts[j], E[i][j]],
+             [xs[i + 1], ts[j], E[i + 1][j]],
+             [xs[i + 1], ts[j + 1], E[i + 1][j + 1]],
+             [xs[i], ts[j + 1], E[i][j + 1]]]
+            for i in range(nx - 1) for j in range(nt - 1)]
+
+
+def burgers_tw(nx=200, nt=120, x0=-3.0, x1=5.0, t1=4.0,
+               u1=1.0, u2=-0.5, nu=0.05, zscale=1.0):
+    """黏性 Burgers 行波（Taylor 激波剖面）高度场 u(x,t)。
+
+    u_t+uu_x=νu_xx 精确行波解：u=u₂+(u₁−u₂)/(1+e^{(u₁−u₂)(x−st)/(2ν)})，
+    s=(u₁+u₂)/2 恰为无黏 RH 速率（黏性剖面选出熵满足激波）；厚度 ∝ν/(u₁−u₂)；
+    Cole-Hopf u=−2ν∂ₓlnφ 恒等。高度场=u(x,t)：平移的扩散激波front。
+    """
+    s = (u1 + u2) / 2.0
+    xs = np.linspace(x0, x1, nx).tolist()
+    ts = np.linspace(0.0, t1, nt).tolist()
+    X, T = np.meshgrid(np.asarray(xs), np.asarray(ts), indexing='ij')
+    U = (u2 + (u1 - u2) / (1.0 + np.exp((u1 - u2) * (X - s * T) / (2 * nu)))
+         ) * zscale
+    Ul = U.tolist()
+    return [[[xs[i], ts[j], Ul[i][j]],
+             [xs[i + 1], ts[j], Ul[i + 1][j]],
+             [xs[i + 1], ts[j + 1], Ul[i + 1][j + 1]],
+             [xs[i], ts[j + 1], Ul[i][j + 1]]]
+            for i in range(nx - 1) for j in range(nt - 1)]
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
         'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl,
         'blasius': blasius, 'karman': karman, 'love': love,
         'prandtl_meyer': prandtl_meyer,
-        'rayleigh_taylor': rayleigh_taylor, 'n_wave': n_wave}
+        'rayleigh_taylor': rayleigh_taylor, 'n_wave': n_wave,
+        'oblique_shock': oblique_shock, 'gn_solitary': gn_solitary,
+        'burgers_tw': burgers_tw}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}

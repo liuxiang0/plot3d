@@ -446,6 +446,15 @@ _GEN_SPECS = {
     'n_wave': {'name': 'Sonic boom N 波（无黏 Burgers 自相似）', 'category': '偏微分方程解',
                'gen': 'n_wave', 'faces_kind': 'heightfield',
                'desc': '声爆 N 波：u_t+cu_x+βuu_x=0 的自相似弱解 u=(x−ct)/(βt)（|x−ct|<a√t），头尾激波 x=ct±a√t 速率 c+a/(2√t) 恰为 Rankine-Hugoniot；幅值∝t^{−1/2}、宽度∝t^{1/2}（∫|u|dξ=a²/β 守恒）、零均值；高度场=u(x,t)：N 形斜坡随时间展宽衰灭'},
+    'oblique_shock': {'name': '斜激波（θ-β-M 弱解）', 'category': '偏微分方程解',
+                      'gen': 'oblique_shock', 'faces_kind': 'heightfield',
+                      'desc': '超音速流遇凹角（M₁=2.5, 楔角 15°）的附着斜激波弱解：θ-β-M 关系扫描+二分精解 β；p₂/p₁=1+2γ/(γ+1)(M₁²sin²β−1)；高度场=(p/p₁−1)：激波线 y=x·tanβ 上游平台/下游台阶，悬崖即激波；楔体与跨激波格剔除；门禁验四条 Rankine-Hugoniot 跳变+熵增'},
+    'gn_solitary': {'name': 'Green-Naghdi 浅水孤波', 'category': '偏微分方程解',
+                    'gen': 'gn_solitary', 'faces_kind': 'heightfield',
+                    'desc': 'GN/Serre 全非线性弱色散浅水方程的精确孤波：η=a·sech²((x−ct)/L)，c²=g(h₀+a)、L=(2h₀/√3)√((h₀+a)/a)（h₀=1, a=0.3）；满足稳态 Serre 第一积分（发散形式守恒律），KdV 极限残差→0；高度场=η(x,t)：平移的 sech² 脊'},
+    'burgers_tw': {'name': '黏性 Burgers 行波（Taylor 激波）', 'category': '偏微分方程解',
+                   'gen': 'burgers_tw', 'faces_kind': 'heightfield',
+                   'desc': 'u_t+uu_x=νu_xx 精确行波（ν=0.05, u₁=1→u₂=−0.5）：u=u₂+(u₁−u₂)/(1+e^{(u₁−u₂)(x−st)/(2ν)})，s=(u₁+u₂)/2 恰为无黏 RH 速率（黏性选熵）；厚度∝ν/(u₁−u₂)；Cole-Hopf u=−2ν∂ₓlnφ 恒等；高度场=u(x,t)：平移的扩散激波锋'},
 }
 try:
     import trisurf as _trisurf

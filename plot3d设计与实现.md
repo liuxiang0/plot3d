@@ -1462,3 +1462,10 @@ PDE 族⑤ 完成 ✅ 提交 `76815d5`。弹性波 ×2 + 空气动力学 ×2：
 - **Kármán 涡街时间滑杆**：ANIM_PRESETS 新增「涡街平移（时间 s）」（z=tanh((ln t2−ln t1)/π) 夹取涡核奇异，s∈[0,5.66]）；门禁独立复算 =tanh(4ψ(x−Us,y)) 差 1.1e-16、刚性平移自洽 0；gates/make_karman_gif.py 导出 output/karman_street_anim.gif（24 帧 1.22MB，帧间平移 QA 过）
 - gate_pde9.py 20/20（挂 run_all.sh，现 10 门禁脚本）；坑：φ 漏 e^{nt} 时频差（动力学残差恰 −1）；numpy2 无 trapz→trapezoid；mathparse 参数是重解析赋值而非 f 第三参（门禁改与 app 滑块同机制）
 - 缩略图 2/2 QA（RT 缝线状衰逝脊 / N 波双激波折带）；图鉴 1.52MB；README 138/138/141；web 重启带族⑨
+
+## PDE 族⑩（11-12 13:24 点单「下一批全做」）：+3 条目，库至 141 builtin / 144 含用户，卡 141
+- oblique_shock 斜激波弱解（M₁=2.5, θ_w=15°）：θ-β-M 扫描+二分 β=36.944900°（残差<1e-12，θ_max=29.797° 裕度）；**四条 Rankine-Hugoniot 跳变（质量/法向动量/切向速度/能量）全 4.4e-16 级**；熵增 Δs/R=0.0737；高度场=(p/p₁−1) 台阶，激波线悬崖+楔体剔除
+- gn_solitary Green-Naghdi/Serre 孤波：**非 sech²**——稳态第一积分 ODE 对 c 二分打靶的同宿轨道精解（c=1.136689723∈(√gh₀,√(g(h₀+a)))）；第一积分 FD 复算 6.0e-11；同宿尾幅 1.0e-8；KdV 极限收敛自证（剖面相对 L2 8.1e-4→2.0e-4、c 相对差 6.5e-5→4.2e-6 @ a=0.02→0.005）；磁盘缓存 cache_gn_*.npy
+- burgers_tw 黏性 Burgers 行波（Taylor 激波，ν=0.05）：符号 PDE 0；RH 速率恒等；Cole-Hopf 恒等 0；Lax 熵条件；厚度 8νln3/Δ=0.29296
+- gate_pde10.py 25/25（挂 run_all.sh，现 11 门禁脚本）；坑：sech² 非 Serre 精确解（第一积分残差 1.6e-3，手动波峰核算 L² 算术错所致）→ 改同宿打靶；打靶判据用尾段 min 符号（末值符号在小 a 失稳）；sympy Float(0.0)==0 为 False → 改 float 绝对值；numpy vstack 标量需 full_like
+- 缩略图 3/3 QA（双平台+直线悬崖缝 / 平移 sech² 脊 / 扩散锋台阶）；图鉴 1.53MB；README 141/141/144；web 重启带族⑩
