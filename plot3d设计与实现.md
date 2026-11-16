@@ -1494,5 +1494,7 @@ PDE 族⑤ 完成 ✅ 提交 `76815d5`。弹性波 ×2 + 空气动力学 ×2：
 - 缩略图 3/3 QA；图鉴 1.59MB；README 150/150/153；web 重启带族⑬
 
 ## 项目收尾（11-16 同轮）
-- 全系统终检：gates/run_all.sh 14 门禁全绿（见下）；库/卡/缩略图/图鉴一致性；web API 153 条；git 干净
-- 本文件至此为 plot3d 项目的完整设计-实现-验证记录；后续维护见 README-cn.md 与 gates/
+- 全系统终检（gates/run_all.sh 一键，exit 0）：gate_pde 16/16、gate_pde2 13/13、gate_pde3 12/12、gate_pde4 13/13、gate_pde5 15/15、gate_pde6 15/15、gate_pde7 17/17、gate_pde8 17/17、gate_pde9 20/20、gate_pde10 25/25、gate_pde11 24/24、gate_pde12 20/20、gate_pde13 19/19 = **PDE 检查 226 项全绿**；gate_simplify（Kummer MC 抽稀 15576→3000、导出管线）与 gate_genus（P/G/IWP± 亏格 3/5/7/2.5）过
+- 一致性终检：total=153 / builtin=150 / cards=150 / 缺卡=none / 缺缩略图=none / 孤儿卡=none / 图鉴(1.59MB)新于最新缩略图 / git status 干净 / web API=153 条
+- 交付物清单：plot3d/ 库+画廊+图鉴+门禁+web+启动器 run.sh；设计文档（本文件）=完整设计-实现-验证记录；README-cn.md=用户手册；memory/ 每日日志 + MEMORY.md 收官快照
+- 项目状态：**收官**。后续维护入口：gates/run_all.sh 回归、README-cn.md、本文件族谱节
