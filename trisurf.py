@@ -747,6 +747,82 @@ def kdv_cnoidal(nx=220, nt=120, x0=0.0, x1=12.0, t1=6.0,
             for i in range(nx - 1) for j in range(nt - 1)]
 
 
+def hydraulic_jump(nx=180, ny=140, x0=-3.0, x1=3.0, fr0=1.05, fr1=4.0,
+                   g=1.0, zscale=1.0):
+    """水跃（hydraulic jump）高度场 h/h₁(x, Fr₁)：稳态参照系下的 bore 镜像。
+
+    超临界来流 Fr₁>1 经不连续跳至亚临界：Belanger/RH 给 h₂/h₁=(−1+√(1+8Fr₁²))/2；
+    高度场：x<0 为 1、x>0 为 r(Fr₁)（y 轴=Fr₁），x=0 跳变线格不出面。
+    """
+    xs = np.linspace(x0, x1, nx)
+    frs = np.linspace(fr0, fr1, ny)
+    X, FR = np.meshgrid(xs, frs, indexing='ij')
+    R = (-1.0 + np.sqrt(1.0 + 8.0 * FR * FR)) / 2.0
+    Z = np.where(X < 0.0, 1.0, R) * zscale
+    sgn = np.sign(X)
+    bad = (sgn[:-1, :-1] != sgn[1:, :-1]) | (sgn[:-1, :-1] != sgn[1:, 1:]) \
+        | (sgn[:-1, :-1] != sgn[:-1, 1:])
+    Zl = Z.tolist()
+    xl, yl = xs.tolist(), frs.tolist()
+    ii, jj = np.nonzero(~bad)
+    return [[[xl[i], yl[j], Zl[i][j]],
+             [xl[i + 1], yl[j], Zl[i + 1][j]],
+             [xl[i + 1], yl[j + 1], Zl[i + 1][j + 1]],
+             [xl[i], yl[j + 1], Zl[i][j + 1]]]
+            for i, j in zip(ii.tolist(), jj.tolist())]
+
+
+def _kdv_dsw_solve(L=160.0, N=2048, T=10.0, dt=4e-3, uL=1.0, save_every=50):
+    """KdV u_t+6uu_x+u_xxx=0 台阶初值（u_L→0，tanh 光滑宽 0.5）伪谱积分因子 RK4。
+    缓存 (x, ts, U)；undular bore（GP/Whitham genus-1 图景）数值解本体。"""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cache_kdvdsw.npy')
+    if os.path.exists(path):
+        arr = np.load(path)
+        Nn, M = int(arr[0]), int(arr[1])
+        return arr[2:2 + Nn], arr[2 + Nn:2 + Nn + M], arr[2 + Nn + M:].reshape(M, Nn)
+    x = np.linspace(-L / 2, L / 2, N)
+    dx = x[1] - x[0]
+    k = 2 * np.pi * np.fft.fftfreq(N, d=dx)
+    u = uL / (1.0 + np.exp(x / 2.0))
+    lin = 1j * k ** 3
+    filt = (np.abs(k) <= 0.6 * np.abs(k).max()).astype(float)   # 2/3 去混叠
+    ts, frames = [], []
+    nsteps = int(T / dt)
+
+    def nl(w, tt):
+        uf = np.fft.ifft(w * np.exp(-lin * tt)).real
+        return filt * np.exp(lin * tt) * (-3j * k) * np.fft.fft(uf * uf)
+
+    for step in range(nsteps + 1):
+        tt = step * dt
+        if step % save_every == 0:
+            ts.append(tt)
+            frames.append(u.copy())
+        if step == nsteps:
+            break
+        w = np.fft.fft(u)
+        k1 = nl(w, tt)
+        k2 = nl(w + dt / 2 * k1, tt + dt / 2)
+        k3 = nl(w + dt / 2 * k2, tt + dt / 2)
+        k4 = nl(w + dt * k3, tt + dt)
+        w = w + dt / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+        u = np.fft.ifft(w * np.exp(-lin * (tt + dt))).real
+    U = np.array(frames)
+    np.save(path, np.concatenate([np.array([N, len(ts)]), x, np.array(ts), U.ravel()]))
+    return x, np.array(ts), U
+
+
+def kdv_dsw(nx=256, nt=41, zscale=1.0, **kw):
+    """KdV undular bore 高度场 u(x,t)（缓存）：前缘孤子列（速度=幅值，孤子律自证）、
+    后缘线性色散边——Whitham genus-1 调制图景的直接验证载体。"""
+    x, ts, U = _kdv_dsw_solve()
+    return [[[float(x[i]), float(ts[j]), float(U[j][i] * zscale)],
+             [float(x[i + 1]), float(ts[j]), float(U[j][i + 1] * zscale)],
+             [float(x[i + 1]), float(ts[j + 1]), float(U[j + 1][i + 1] * zscale)],
+             [float(x[i]), float(ts[j + 1]), float(U[j + 1][i] * zscale)]]
+            for i in range(0, len(x) - 1, 8) for j in range(len(ts) - 1)]
+
+
 GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'terrain': terrain, 'sph_tri_patch': sph_tri_patch, 'drum': drum,
         'fdtd': fdtd, 'gray_scott': gray_scott, 'flow_cyl': flow_cyl,
@@ -755,7 +831,8 @@ GENS = {'geodesic': geodesic, 'bezier_tri': bezier_tri,
         'rayleigh_taylor': rayleigh_taylor, 'n_wave': n_wave,
         'oblique_shock': oblique_shock, 'gn_solitary': gn_solitary,
         'burgers_tw': burgers_tw, 'gn_bore': gn_bore,
-        'sw_rarefaction': sw_rarefaction, 'kdv_cnoidal': kdv_cnoidal}
+        'sw_rarefaction': sw_rarefaction, 'kdv_cnoidal': kdv_cnoidal,
+        'hydraulic_jump': hydraulic_jump, 'kdv_dsw': kdv_dsw}
 
 
 _SKIP = {'gen', 'name', 'category', 'desc', 'faces_kind'}

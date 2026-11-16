@@ -218,6 +218,11 @@ BUILTIN = {
                      'expr': 'z=0.1*cos(x-1.004987562112089*y)+0.005*cos(2*(x-1.004987562112089*y)); '
                              'x=0..12.566370614359172, y=0..6.283185307179586',
                      'desc': '二阶 Stokes 波剖面 η=a cosθ+(ka²/2)cos2θ（k=1, a=0.1, g=1, ω²=gk(1+(ka)²)）：峰尖谷平；配套 Stokes 漂移 u_S=ωka²e^{2kz}——门禁以四周期粒子跟踪数值复现漂移（±3%）；高度场=η(x,t)'},
+    'stokes3': {'name': '深水 Stokes 三阶剖面', 'category': '偏微分方程解',
+                'expr': 'z=0.12*cos(x-1.0071742650*y)+0.0072*cos(2*(x-1.0071742650*y))'
+                        '+0.000648*cos(3*(x-1.0071742650*y)); '
+                        'x=0..12.566370614359172, y=0..6.283185307179586',
+                'desc': '深水 Stokes 三阶剖面 η=a cosθ+(ka²/2)cos2θ+(3k²a³/8)cos3θ（k=1, a=0.12）：三谐波入场，峰尖谷平比二阶再强一阶；幅比 1:ka/2:3(ka)²/8；ω²=gk(1+(ka)²)；门禁以正交性验三谐波幅比+自由面残差比二阶降一阶'},
     'shock_polar': {'name': '激波极线（M₁=2.5 速端曲线）', 'category': '偏微分方程解',
                     'expr': 'x=2.5*sin(t)^2*(2.5*sin(t)^2+2)/(15*sin(t)^2)+2.5*cos(t)^2, '
                             'y=cos(t)*2.5*sin(t)*(1-(2.5*sin(t)^2+2)/(15*sin(t)^2)), z=0; t=0.42..1.5707',
@@ -475,6 +480,12 @@ _GEN_SPECS = {
     'kdv_cnoidal': {'name': 'KdV cnoidal 波（Whitham 载波）', 'category': '偏微分方程解',
                     'gen': 'kdv_cnoidal', 'faces_kind': 'heightfield',
                     'desc': 'KdV u_t+6uu_x+u_xxx=0 的 cnoidal 周期行波 u=B+A·cn²(k(x−ct),m)——Whitham 调制理论的载波（undular bore 内部的波即参数缓变的它）；(k,c) 由 fsolve+FD 数值精解；m→1 退 sech² 孤子、m→0 退余弦；高度场=u(x,t)'},
+    'hydraulic_jump': {'name': '水跃（hydraulic jump）', 'category': '偏微分方程解',
+                       'gen': 'hydraulic_jump', 'faces_kind': 'heightfield',
+                       'desc': '水跃：超临界来流 Fr₁>1 经不连续跳至亚临界（bore 的稳态参照系镜像）；Bélanger 动量 RH 给 h₂/h₁=(−1+√(1+8Fr₁²))/2；水头损失 ΔE=(h₂−h₁)³/(4h₁h₂)>0（熵选方向）；高度场=h/h₁(x, Fr₁)：x=0 台阶随 Fr₁ 长高'},
+    'kdv_dsw': {'name': 'KdV undular bore（伪谱数值解）', 'category': '偏微分方程解',
+                'gen': 'kdv_dsw', 'faces_kind': 'heightfield',
+                'desc': 'KdV u_t+6uu_x+u_xxx=0 台阶初值（u_L=1→0）伪谱积分因子 RK4 数值解本体：色散正则化扇（Riemann 自相似：扇边 x/t 恒定）+ undular 波列；Whitham genus-1 调制理论描述扇内波列缓变；守恒量 ∫u、∫u² 门禁监测；缓存 cache_kdvdsw.npy'},
 }
 try:
     import trisurf as _trisurf
