@@ -6,6 +6,7 @@ __pycache__/
 # 产物（可再生成，体积大）
 output/
 web/qa/
+web/__pycache__/
 svg/
 
 # 用户本地状态（可选保留）
@@ -15,3 +16,4 @@ svg/
 # 编辑器/系统
 .DS_Store
 *.swp
+*.npy

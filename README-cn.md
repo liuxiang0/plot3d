@@ -137,22 +137,6 @@ plot3d/
 
 ---
 
-## 发布到 GitHub
-
-本目录为独立 Git 仓库（与上层 workspace 解耦，`output/` 等产物已忽略）。
-
-```bash
-cd plot3d
-git init && git add . && git commit -m "plot3d: 3D 数学可视化平台（桌面+手机双形态）"
-git branch -M main
-git remote add origin https://github.com/<你的用户名>/plot3d.git
-git push -u origin main
-```
-
-详见会话内的发布指引（含认证方式选择）。
-
----
-
 ## 许可与引用
 
 - 数学内容来源：NuminaMath、Nordstrand 数学画廊、MathWorld、Schoen (1970, NASA TN D-5541)、Barth (1996)
