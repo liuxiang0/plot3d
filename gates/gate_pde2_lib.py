@@ -1,6 +1,7 @@
+import os
 import sys
-sys.path.insert(0, '/home/kumath/.openclaw/workspace/plot3d')
-sys.path.insert(0, '/home/kumath/.openclaw/workspace/plot3d/web')
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'web'))
 import curve_library, geometry
 
 grouped, warns = curve_library.load_all()

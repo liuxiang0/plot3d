@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """PDE 族②门禁：Burgers 黏性激波 / Schrödinger 高斯波包 / Maxwell FDTD 快照"""
+import os
 import sys
-sys.path.insert(0, '/home/kumath/.openclaw/workspace/plot3d')
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 import numpy as np
 import trisurf
 

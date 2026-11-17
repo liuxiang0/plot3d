@@ -1,6 +1,7 @@
+import os
 import sys
-sys.path.insert(0, '/home/kumath/.openclaw/workspace/plot3d')
-sys.path.insert(0, '/home/kumath/.openclaw/workspace/plot3d/web')
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'web'))
 import importlib.util
 import math
 import numpy as np
@@ -8,7 +9,7 @@ import curve_library as cl
 import export3d
 import simplify
 
-spec = importlib.util.spec_from_file_location('geom', '/home/kumath/.openclaw/workspace/plot3d/web/geometry.py')
+spec = importlib.util.spec_from_file_location('geom', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'web', 'geometry.py'))
 geom = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(geom)
 

@@ -13,7 +13,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'plot3d'))
-sys.path.insert(0, '/home/kumath/.openclaw/workspace/plot3d')
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 import mathparse                                  # noqa: E402
 import curve_library as cl                        # noqa: E402
 
@@ -108,7 +108,7 @@ for _ in range(100):
 check('匀态 (1,0) 为不动点', abs(U0 - 1).max() < 1e-12 and abs(V0).max() < 1e-12)
 import trisurf                                    # noqa: E402
 trisurf.build(cl._GEN_SPECS['gray_scott'])        # 与条目同参构建, 确保缓存存在
-V = np.load('/home/kumath/.openclaw/workspace/plot3d/cache_grayscott.npy')
+V = np.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'cache_grayscott.npy'))
 check('斑图非平凡 std(V)>0.05', V.std() > 0.05, '实测 %.3f' % V.std())
 check('V 有界 0≤V≤0.5', V.min() >= -1e-9 and V.max() <= 0.5,
       '实测 [%.3f, %.3f]' % (V.min(), V.max()))

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """新增 PDE 条目解析+几何门禁：load_all 0 警告 + sample() mesh/lines 与 bbox 对账"""
+import os
 import sys
-sys.path.insert(0, '/home/kumath/.openclaw/workspace/plot3d')
-sys.path.insert(0, '/home/kumath/.openclaw/workspace/plot3d/web')
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'web'))
 import curve_library, geometry
 
 grouped, warns = curve_library.load_all()
