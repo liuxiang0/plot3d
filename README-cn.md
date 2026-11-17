@@ -41,7 +41,7 @@ plot3d/gates/run_all.sh
 
 ## 目录结构
 
-```
+```text
 plot3d/
 ├── main_app.py          # 桌面合并入口（绘图器 + 样条设计器双标签）
 ├── plotter_app.py       # 绘图器主窗口（八形态解析/渲染/动画预设）
@@ -60,7 +60,7 @@ plot3d/
 
 ## 许可证
 
-MIT License © 2026 kumath。自由使用、修改、分发，保留版权声明即可。（仓库根附 `LICENSE` 文件；如需我补写标准 MIT 全文，说一声。）
+MIT License © 2026 kumath。自由使用、修改、分发，保留版权声明即可。（仓库根附 `LICENSE` 文件。）
 
 ## 发布到 GitHub（含网站）
 
@@ -76,10 +76,12 @@ git push -u origin main
 **GitHub Pages 网站**（托管《曲线图鉴》）：
 
 1. 图鉴为单文件自包含 HTML（KaTeX 与缩略图 base64 全内联），最适合 Pages：
+
    ```bash
    mkdir -p docs && cp output/曲线图鉴.html docs/index.html
    git add docs && git commit -m "docs: 曲线图鉴上线 Pages" && git push
    ```
+
 2. 仓库 → **Settings → Pages** → Source 选 `Deploy from a branch` → Branch 选 `main`、目录 `/docs` → Save；
 3. 数分钟后访问 `https://<你的用户名>.github.io/plot3d-math/` 即为图鉴网站。
 
